@@ -1,8 +1,10 @@
 import { HeroSection } from "@/components/sections/hero-section";
 import { PopularTools } from "@/components/sections/popular-tools";
+import { FeaturedTools } from "@/components/sections/featured-tools";
 import { CategoriesSection } from "@/components/sections/categories-section";
-import { FAQHome } from "@/components/sections/faq-home";
 import { CTASection } from "@/components/sections/cta-section";
+import { RoadmapSection } from "@/components/sections/roadmap-section";
+import { FAQHome } from "@/components/sections/faq-home";
 import {
   generateOrganizationSchema,
   generateWebsiteSchema,
@@ -60,8 +62,10 @@ export default function HomePage() {
 
       <HeroSection />
       <PopularTools />
+      <FeaturedTools />
       <CategoriesSection />
       <CTASection />
+      <RoadmapSection />
       <FAQHome />
     </>
   );

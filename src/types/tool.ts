@@ -20,7 +20,8 @@ export type ToolCategory =
   | "finance"
   | "student"
   | "text"
-  | "converter";
+  | "converter"
+  | "utilities";
 
 /** Feature flag states */
 export type FeatureState = "enabled" | "disabled" | "beta" | "internal";

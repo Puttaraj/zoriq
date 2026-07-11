@@ -110,7 +110,22 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="relative flex min-h-screen flex-col">
+          <div className="relative flex min-h-screen flex-col overflow-hidden">
+            {/* Soft Blurred Ambient circles for Premium Mesh Gradient */}
+            <div
+              className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+              aria-hidden="true"
+            >
+              <div className="bg-primary/10 dark:bg-primary/5 animate-float absolute -top-[20%] left-[10%] h-[500px] w-[500px] rounded-full blur-[130px]" />
+              <div
+                className="bg-secondary/8 dark:bg-secondary/4 animate-float absolute top-[25%] -right-[15%] h-[500px] w-[500px] rounded-full blur-[130px]"
+                style={{ animationDelay: "-3s" }}
+              />
+              <div
+                className="bg-accent-surface/5 dark:bg-accent-surface/2 animate-float absolute -bottom-[10%] left-[20%] h-[400px] w-[400px] rounded-full blur-[120px]"
+                style={{ animationDelay: "-6s" }}
+              />
+            </div>
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />

@@ -1,33 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Zap } from "lucide-react";
+import { Menu, X, WifiOff } from "lucide-react";
 import { mainNav } from "@/config/navigation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { Logo } from "@/components/shared/logo";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import { cn } from "@/lib/utils";
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const isOnline = useOnlineStatus();
   const pathname = usePathname();
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <header className="border-border/40 bg-background/80 sticky top-0 z-50 w-full border-b backdrop-blur-xl">
-      <div className="container-tight flex h-16 items-center justify-between">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full border-b transition-all duration-300",
+        scrolled
+          ? "border-border/40 bg-background/80 h-14 backdrop-blur-xl"
+          : "h-16 border-transparent bg-transparent",
+      )}
+    >
+      <div className="container-tight flex h-full items-center justify-between">
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 transition-opacity hover:opacity-80"
+          className="flex items-center transition-opacity hover:opacity-90"
           aria-label="ZORIQ Home"
         >
-          <div className="gradient-brand flex h-8 w-8 items-center justify-center rounded-lg">
-            <Zap className="h-4 w-4 text-white" />
-          </div>
-          <span className="font-heading text-xl font-bold tracking-tight">
-            ZORIQ
-          </span>
+          <Logo />
         </Link>
 
         {/* Desktop Navigation */}
@@ -61,6 +75,12 @@ export function Header() {
 
         {/* Right Side */}
         <div className="flex items-center gap-2">
+          {!isOnline && (
+            <span className="hidden items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold text-amber-500 sm:inline-flex">
+              <WifiOff className="h-3.5 w-3.5" />
+              Offline Mode
+            </span>
+          )}
           <ThemeToggle />
 
           {/* Mobile Menu Button */}

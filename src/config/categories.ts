@@ -59,6 +59,15 @@ export const categories: CategoryConfig[] = [
     color: "from-fuchsia-500 to-purple-600",
     toolCount: 0,
   },
+  {
+    slug: "utilities",
+    name: "Utilities",
+    description:
+      "General daily utility tools, conversion scripts, formatting helpers, and more.",
+    icon: "Wrench",
+    color: "from-teal-500 to-cyan-600",
+    toolCount: 0,
+  },
 ];
 
 /**

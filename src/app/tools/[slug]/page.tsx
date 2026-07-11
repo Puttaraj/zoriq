@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { getToolBySlug, getRelatedTools, tools } from "@/config/tools";
 import { getCategoryBySlug } from "@/config/categories";
 import {
@@ -13,6 +14,9 @@ import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { FAQSection } from "@/components/shared/faq-section";
 import { RelatedTools } from "@/components/shared/related-tools";
 import { AdPlaceholder } from "@/components/ads/ad-slots";
+import { ShareButton } from "@/components/shared/share-button";
+import { CopyButton } from "@/components/shared/copy-button";
+import { siteConfig } from "@/config/site";
 
 // Dynamic imports for Tool Workspaces to keep initial JS bundles tiny (< 150KB)
 const PasswordWorkspace = dynamic(
@@ -276,14 +280,32 @@ export default async function ToolPage({ params }: ToolPageProps) {
       <div className="container-tight py-8 md:py-12">
         <Breadcrumbs items={breadcrumbs} />
 
-        {/* Heading */}
-        <div className="mb-8 max-w-3xl">
-          <h1 className="font-heading text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
-            {tool.name}
-          </h1>
-          <p className="text-muted-foreground mt-2 text-base leading-relaxed">
-            {tool.description}
-          </p>
+        {/* Heading Row */}
+        <div className="mb-8 flex max-w-5xl flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="max-w-3xl">
+            <h1 className="font-heading text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
+              {tool.name}
+            </h1>
+            <p className="text-muted-foreground mt-2 text-sm leading-relaxed sm:text-base">
+              {tool.description}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 sm:self-start">
+            <ShareButton
+              url={`${siteConfig.url}/tools/${tool.slug}`}
+              title={`ZORIQ — ${tool.name}`}
+            />
+            <CopyButton
+              text={`${siteConfig.url}/tools/${tool.slug}`}
+              label="Copy Link"
+            />
+            <Link
+              href={`/contact?subject=Report%20Issue%20with%20${tool.slug}`}
+              className="border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground focus-ring inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-semibold transition-all"
+            >
+              Report Issue
+            </Link>
+          </div>
         </div>
 
         {/* Workspace Card Container */}

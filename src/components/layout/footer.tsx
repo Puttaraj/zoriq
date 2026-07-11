@@ -1,72 +1,219 @@
 import Link from "next/link";
-import { Zap, Heart } from "lucide-react";
-import { footerNav } from "@/config/navigation";
+import { Heart, Github, Twitter, MessageSquare } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { Logo } from "@/components/shared/logo";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-border/40 bg-muted/30 border-t">
-      {/* Main Footer */}
-      <div className="container-tight py-12 lg:py-16">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Brand Column */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <Link
-              href="/"
-              className="mb-4 inline-flex items-center gap-2"
-              aria-label="ZORIQ Home"
-            >
-              <div className="gradient-brand flex h-8 w-8 items-center justify-center rounded-lg">
-                <Zap className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-heading text-xl font-bold tracking-tight">
-                ZORIQ
-              </span>
+    <footer className="border-border/40 bg-muted/10 border-t">
+      {/* Main Footer Container */}
+      <div className="container-tight py-16 lg:py-20">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-12">
+          {/* Brand Info & Newsletter */}
+          <div className="flex flex-col gap-6 md:col-span-4">
+            <Link href="/" aria-label="ZORIQ Home">
+              <Logo />
             </Link>
-            <p className="text-muted-foreground mt-3 max-w-xs text-sm leading-relaxed">
-              {siteConfig.tagline}. Free online tools for developers, students,
-              and everyone.
+            <p className="text-muted-foreground max-w-xs text-xs leading-relaxed">
+              {siteConfig.tagline}. Handcrafted browser utilities designed for
+              speed and total privacy. No downloads, no storage, no tracking.
             </p>
+
+            {/* Premium Newsletter Sign-up Box */}
+            <div className="mt-2 flex max-w-sm flex-col gap-2.5">
+              <h4 className="text-foreground text-[10px] font-bold tracking-wider uppercase">
+                Subscribe to our newsletter
+              </h4>
+              <div className="border-border/40 bg-card focus-within:border-primary/50 relative flex items-center rounded-lg border p-1 transition-all duration-300">
+                <input
+                  type="email"
+                  placeholder="name@email.com"
+                  className="placeholder:text-muted-foreground/60 w-full flex-1 bg-transparent px-2.5 py-1.5 text-xs outline-none"
+                  aria-label="Newsletter email"
+                />
+                <button
+                  type="button"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 focus-ring rounded px-3 py-1.5 text-[10px] font-semibold transition-all"
+                >
+                  Join
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Navigation Columns */}
-          {footerNav.map((section) => (
-            <div key={section.title}>
-              <h3 className="text-foreground mb-4 text-sm font-semibold">
-                {section.title}
-              </h3>
-              <ul className="space-y-3">
-                {section.links.map((link) => (
-                  <li key={link.href + link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-                      {...(link.isExternal
-                        ? { target: "_blank", rel: "noopener noreferrer" }
-                        : {})}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+          {/* Navigation Columns Grid */}
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:col-span-8 md:pl-8">
+            {/* Tools Column */}
+            <div className="flex flex-col gap-3.5">
+              <h4 className="text-foreground text-[10px] font-bold tracking-wider uppercase">
+                Tools
+              </h4>
+              <ul className="text-muted-foreground flex flex-col gap-2.5 text-xs">
+                <li>
+                  <Link
+                    href="/tools?category=developer"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Developer
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/tools?category=image"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Image Utilities
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/tools?category=student"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Student & Writer
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/tools?category=finance"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Finance Calculators
+                  </Link>
+                </li>
               </ul>
             </div>
-          ))}
+
+            {/* Resources Column */}
+            <div className="flex flex-col gap-3.5">
+              <h4 className="text-foreground text-[10px] font-bold tracking-wider uppercase">
+                Resources
+              </h4>
+              <ul className="text-muted-foreground flex flex-col gap-2.5 text-xs">
+                <li>
+                  <Link
+                    href="/about"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/contact"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Help Center
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    GitHub Docs
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    href="/api/health"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    System Status
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal Column */}
+            <div className="flex flex-col gap-3.5">
+              <h4 className="text-foreground text-[10px] font-bold tracking-wider uppercase">
+                Legal
+              </h4>
+              <ul className="text-muted-foreground flex flex-col gap-2.5 text-xs">
+                <li>
+                  <Link
+                    href="/privacy"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/terms"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/privacy#cookies"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Cookie settings
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="border-border/40 border-t">
-        <div className="container-tight flex flex-col items-center justify-between gap-4 py-6 sm:flex-row">
-          <p className="text-muted-foreground text-xs">
-            © {currentYear} {siteConfig.name}. All rights reserved.
-          </p>
-          <p className="text-muted-foreground flex items-center gap-1 text-xs">
-            Made with <Heart className="h-3 w-3 fill-red-500 text-red-500" /> in
-            India
-          </p>
+      {/* Bottom Bar Details */}
+      <div className="border-border/40 bg-muted/20 border-t">
+        <div className="container-tight text-muted-foreground flex flex-col items-center justify-between gap-4 py-8 text-xs sm:flex-row">
+          <div className="flex flex-wrap items-center gap-2">
+            <span>
+              © {currentYear} {siteConfig.name}. All rights reserved.
+            </span>
+            <span className="bg-muted border-border/30 rounded border px-2 py-0.5 text-[10px]">
+              v0.1.0
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Social Icons */}
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors"
+              aria-label="GitHub"
+            >
+              <Github className="h-4 w-4" />
+            </a>
+            <a
+              href="https://twitter.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors"
+              aria-label="Twitter"
+            >
+              <Twitter className="h-4 w-4" />
+            </a>
+            <a
+              href="https://discord.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors"
+              aria-label="Discord"
+            >
+              <MessageSquare className="h-4 w-4" />
+            </a>
+
+            <span className="bg-border/40 h-4 w-px" />
+
+            <p className="flex items-center gap-1">
+              Made with <Heart className="h-3 w-3 fill-red-500 text-red-500" />{" "}
+              in India
+            </p>
+          </div>
         </div>
       </div>
     </footer>
