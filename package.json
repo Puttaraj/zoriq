@@ -1,0 +1,60 @@
+{
+  "name": "zoriq",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ZORIQ — Fast, secure, AI-powered online utility tools for everyone.",
+  "author": "ZORIQ <hello@zoriq.co.in>",
+  "homepage": "https://zoriq.co.in",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\"",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "browser-image-compression": "^2.0.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.0.0",
+    "lucide-react": "^0.468.0",
+    "next": "^15.3.0",
+    "next-themes": "^0.4.4",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.0.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "@eslint/eslintrc": "^3.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.0.0",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.3.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.4.0",
+    "prettier-plugin-tailwindcss": "^0.6.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,json,md}": [
+      "prettier --write"
+    ]
+  }
+}

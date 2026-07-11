@@ -1,0 +1,266 @@
+"use client";
+
+import { useState, useCallback, useEffect } from "react";
+import imageCompression from "browser-image-compression";
+import {
+  Image as ImageIcon,
+  Sliders,
+  RefreshCw,
+  Download,
+  Trash2,
+} from "lucide-react";
+import { FileDropzone } from "@/components/shared/file-dropzone";
+import { formatBytes, percentReduction } from "@/lib/utils";
+
+export function CompressorWorkspace() {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [compressedBlob, setCompressedBlob] = useState<Blob | null>(null);
+  const [compressedSize, setCompressedSize] = useState<number | null>(null);
+  const [quality, setQuality] = useState(80); // 80% default
+  const [processing, setProcessing] = useState(false);
+  const [originalPreview, setOriginalPreview] = useState<string>("");
+  const [compressedPreview, setCompressedPreview] = useState<string>("");
+
+  const handleFilesAccepted = useCallback((files: File[]) => {
+    const file = files[0];
+    if (file) {
+      setSelectedFile(file);
+      setOriginalPreview(URL.createObjectURL(file));
+      setCompressedBlob(null);
+      setCompressedSize(null);
+      setCompressedPreview("");
+    }
+  }, []);
+
+  const handleCompress = useCallback(async () => {
+    if (!selectedFile) return;
+
+    setProcessing(true);
+    try {
+      const options = {
+        maxSizeMB: 5,
+        maxWidthOrHeight: 2048,
+        useWebWorker: true,
+        initialQuality: quality / 100,
+      };
+
+      const compressedFile = await imageCompression(selectedFile, options);
+      setCompressedBlob(compressedFile);
+      setCompressedSize(compressedFile.size);
+
+      // Cleanup old preview
+      if (compressedPreview) URL.revokeObjectURL(compressedPreview);
+      setCompressedPreview(URL.createObjectURL(compressedFile));
+    } catch (error) {
+      console.error("Compression error:", error);
+    } finally {
+      setProcessing(false);
+    }
+  }, [selectedFile, quality, compressedPreview]);
+
+  // Trigger compression when selected file or quality changes
+  useEffect(() => {
+    if (selectedFile) {
+      handleCompress();
+    }
+  }, [selectedFile, quality, handleCompress]);
+
+  const handleReset = () => {
+    setSelectedFile(null);
+    setCompressedBlob(null);
+    setCompressedSize(null);
+    if (originalPreview) URL.revokeObjectURL(originalPreview);
+    if (compressedPreview) URL.revokeObjectURL(compressedPreview);
+    setOriginalPreview("");
+    setCompressedPreview("");
+  };
+
+  const handleDownload = () => {
+    if (!compressedBlob || !selectedFile) return;
+
+    // Generate output file name (e.g. photo-compressed.jpg)
+    const ext = selectedFile.name.split(".").pop();
+    const nameWithoutExt = selectedFile.name.substring(
+      0,
+      selectedFile.name.lastIndexOf("."),
+    );
+    const outputName = `${nameWithoutExt}-compressed.${ext}`;
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(compressedBlob);
+    link.download = outputName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  };
+
+  return (
+    <div className="border-border/60 bg-card shadow-soft mx-auto max-w-4xl rounded-2xl border p-6 sm:p-8">
+      {!selectedFile ? (
+        <FileDropzone
+          accept={["image/jpeg", "image/png", "image/webp"]}
+          maxSize={10 * 1024 * 1024} // 10 MB
+          multiple={false}
+          onFilesAccepted={handleFilesAccepted}
+          label="Drag & drop your image here"
+          helperText="Supports JPEG, PNG, and WebP. Max 10MB."
+        />
+      ) : (
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
+          {/* Controls & Metrics Column */}
+          <div className="flex flex-col gap-6 md:col-span-5">
+            <div className="flex items-center justify-between">
+              <span className="text-foreground text-sm font-semibold">
+                Image Settings
+              </span>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground focus-ring inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold transition-all"
+                aria-label="Remove image"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Clear
+              </button>
+            </div>
+
+            {/* Quality Slider */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between text-sm font-semibold">
+                <span className="text-foreground flex items-center gap-1.5">
+                  <Sliders className="text-primary h-4 w-4" />
+                  Compression Quality
+                </span>
+                <span className="text-primary font-mono">{quality}%</span>
+              </div>
+              <input
+                type="range"
+                min="10"
+                max="100"
+                value={quality}
+                onChange={(e) => setQuality(Number(e.target.value))}
+                className="bg-muted accent-primary h-2 w-full cursor-pointer appearance-none rounded-full focus:outline-none"
+                aria-label="Compression quality"
+                disabled={processing}
+              />
+            </div>
+
+            {/* Performance/Comparison Metrics */}
+            <div className="border-border/60 flex flex-col gap-3 border-t pt-4">
+              <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                File Size Comparison
+              </span>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="border-border/60 bg-muted/10 rounded-xl border p-3.5">
+                  <span className="text-muted-foreground text-[10px] font-bold uppercase">
+                    Original
+                  </span>
+                  <p className="text-foreground mt-1 text-sm font-bold">
+                    {formatBytes(selectedFile.size)}
+                  </p>
+                </div>
+                <div className="border-border/60 bg-muted/10 rounded-xl border p-3.5">
+                  <span className="text-muted-foreground text-[10px] font-bold uppercase">
+                    Compressed
+                  </span>
+                  <p className="text-foreground mt-1 text-sm font-bold">
+                    {processing
+                      ? "Compressing..."
+                      : compressedSize
+                        ? formatBytes(compressedSize)
+                        : "-"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Savings Badge */}
+              {!processing && compressedSize && (
+                <div className="bg-accent-surface/10 border-accent-surface/20 text-accent-surface rounded-xl border p-4 text-center">
+                  <p className="text-xs font-semibold tracking-wider uppercase">
+                    Total Savings
+                  </p>
+                  <h4 className="mt-1 text-2xl font-black">
+                    {percentReduction(selectedFile.size, compressedSize)}% Saved
+                  </h4>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="mt-auto">
+              <button
+                type="button"
+                onClick={handleDownload}
+                disabled={processing || !compressedBlob}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 focus-ring inline-flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {processing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4" />
+                    Download Compressed Image
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Visual Preview comparison Column */}
+          <div className="md:border-border/60 flex flex-col gap-6 md:col-span-7 md:border-l md:pl-8">
+            <span className="text-foreground text-sm font-semibold">
+              Image Preview
+            </span>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {/* Original preview */}
+              <div className="flex flex-col gap-1.5">
+                <span className="text-muted-foreground text-xs font-semibold">
+                  Original Image
+                </span>
+                <div className="border-border bg-muted/10 flex h-48 items-center justify-center overflow-hidden rounded-xl border p-2">
+                  {originalPreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={originalPreview}
+                      alt="Original Image Preview"
+                      className="h-full w-full rounded object-contain"
+                    />
+                  ) : (
+                    <ImageIcon className="text-muted-foreground/30 h-10 w-10 animate-pulse" />
+                  )}
+                </div>
+              </div>
+
+              {/* Compressed preview */}
+              <div className="flex flex-col gap-1.5">
+                <span className="text-muted-foreground text-xs font-semibold">
+                  Compressed Image
+                </span>
+                <div className="border-border bg-muted/10 relative flex h-48 items-center justify-center overflow-hidden rounded-xl border p-2">
+                  {processing ? (
+                    <div className="bg-card/60 absolute inset-0 flex items-center justify-center">
+                      <RefreshCw className="text-primary h-8 w-8 animate-spin" />
+                    </div>
+                  ) : compressedPreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={compressedPreview}
+                      alt="Compressed Image Preview"
+                      className="h-full w-full rounded object-contain"
+                    />
+                  ) : (
+                    <ImageIcon className="text-muted-foreground/30 h-10 w-10 animate-pulse" />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
