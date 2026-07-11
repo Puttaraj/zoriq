@@ -74,17 +74,16 @@ export const metadata: Metadata = {
     images: [`${siteConfig.url}${siteConfig.ogImage}`],
   },
   icons: {
-    icon: "/icons/favicon.ico",
-    shortcut: "/icons/favicon-16x16.png",
-    apple: "/icons/apple-touch-icon.png",
+    icon: "/favicon.svg",
+    apple: "/apple-icon",
   },
-  manifest: "/manifest.json",
+  manifest: "/site.webmanifest",
 };
 
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#FAFBFC" },
-    { media: "(prefers-color-scheme: dark)", color: "#0A0A0F" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090B" },
   ],
   width: "device-width",
   initialScale: 1,
