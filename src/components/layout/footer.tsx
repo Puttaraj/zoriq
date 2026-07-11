@@ -32,6 +32,7 @@ export function Footer() {
                   placeholder="name@email.com"
                   className="placeholder:text-muted-foreground/60 w-full flex-1 bg-transparent px-2.5 py-1.5 text-xs outline-none"
                   aria-label="Newsletter email"
+                  suppressHydrationWarning={true}
                 />
                 <button
                   type="button"

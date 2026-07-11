@@ -26,7 +26,8 @@ export function ConverterWorkspace() {
     }
   }, []);
 
-  const handleConvert = useCallback(() => {
+  // Trigger conversion when settings or original file changes
+  useEffect(() => {
     if (!selectedFile) return;
 
     setConverting(true);
@@ -34,7 +35,6 @@ export function ConverterWorkspace() {
     img.src = originalPreview;
 
     img.onload = () => {
-      // Create offscreen canvas matching image dimensions
       const canvas = document.createElement("canvas");
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
@@ -53,7 +53,6 @@ export function ConverterWorkspace() {
 
       ctx.drawImage(img, 0, 0);
 
-      // Map format key to MIME type
       const mimeMap: Record<OutputFormat, string> = {
         jpeg: "image/jpeg",
         png: "image/png",
@@ -71,8 +70,10 @@ export function ConverterWorkspace() {
         (blob) => {
           if (blob) {
             setConvertedBlob(blob);
-            if (convertedPreview) URL.revokeObjectURL(convertedPreview);
-            setConvertedPreview(URL.createObjectURL(blob));
+            setConvertedPreview((prev) => {
+              if (prev) URL.revokeObjectURL(prev);
+              return URL.createObjectURL(blob);
+            });
           }
           setConverting(false);
         },
@@ -85,14 +86,7 @@ export function ConverterWorkspace() {
       console.error("Failed to load image for conversion.");
       setConverting(false);
     };
-  }, [selectedFile, originalPreview, outputFormat, quality, convertedPreview]);
-
-  // Trigger conversion when output settings change
-  useEffect(() => {
-    if (selectedFile) {
-      handleConvert();
-    }
-  }, [selectedFile, outputFormat, quality, handleConvert]);
+  }, [selectedFile, originalPreview, outputFormat, quality]);
 
   const handleReset = () => {
     setSelectedFile(null);
@@ -165,10 +159,31 @@ export function ConverterWorkspace() {
                 aria-label="Target format"
                 disabled={converting}
               >
-                <option value="png">PNG (.png)</option>
-                <option value="jpeg">JPEG (.jpg)</option>
-                <option value="webp">WebP (.webp)</option>
-                <option value="bmp">BMP (.bmp)</option>
+                {(() => {
+                  const originalExt = getFileExtension(
+                    selectedFile.name,
+                  ).toLowerCase();
+                  return (
+                    <>
+                      <option value="png">
+                        PNG (.png){originalExt === "png" ? " (Original)" : ""}
+                      </option>
+                      <option value="jpeg">
+                        JPEG (.jpg)
+                        {originalExt === "jpg" || originalExt === "jpeg"
+                          ? " (Original)"
+                          : ""}
+                      </option>
+                      <option value="webp">
+                        WebP (.webp)
+                        {originalExt === "webp" ? " (Original)" : ""}
+                      </option>
+                      <option value="bmp">
+                        BMP (.bmp){originalExt === "bmp" ? " (Original)" : ""}
+                      </option>
+                    </>
+                  );
+                })()}
               </select>
             </div>
 
