@@ -32,38 +32,47 @@ export function CompressorWorkspace() {
     }
   }, []);
 
-  const handleCompress = useCallback(async () => {
-    if (!selectedFile) return;
-
-    setProcessing(true);
-    try {
-      const options = {
-        maxSizeMB: 5,
-        maxWidthOrHeight: 2048,
-        useWebWorker: true,
-        initialQuality: quality / 100,
-      };
-
-      const compressedFile = await imageCompression(selectedFile, options);
-      setCompressedBlob(compressedFile);
-      setCompressedSize(compressedFile.size);
-
-      // Cleanup old preview
-      if (compressedPreview) URL.revokeObjectURL(compressedPreview);
-      setCompressedPreview(URL.createObjectURL(compressedFile));
-    } catch (error) {
-      console.error("Compression error:", error);
-    } finally {
-      setProcessing(false);
-    }
-  }, [selectedFile, quality, compressedPreview]);
-
   // Trigger compression when selected file or quality changes
   useEffect(() => {
-    if (selectedFile) {
-      handleCompress();
-    }
-  }, [selectedFile, quality, handleCompress]);
+    if (!selectedFile) return;
+
+    let active = true;
+    setProcessing(true);
+
+    const runCompression = async () => {
+      try {
+        const options = {
+          maxSizeMB: 5,
+          maxWidthOrHeight: 2048,
+          useWebWorker: true,
+          initialQuality: quality / 100,
+        };
+
+        const compressedFile = await imageCompression(selectedFile, options);
+        if (!active) return;
+
+        setCompressedBlob(compressedFile);
+        setCompressedSize(compressedFile.size);
+
+        setCompressedPreview((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return URL.createObjectURL(compressedFile);
+        });
+      } catch (error) {
+        console.error("Compression error:", error);
+      } finally {
+        if (active) {
+          setProcessing(false);
+        }
+      }
+    };
+
+    runCompression();
+
+    return () => {
+      active = false;
+    };
+  }, [selectedFile, quality]);
 
   const handleReset = () => {
     setSelectedFile(null);
