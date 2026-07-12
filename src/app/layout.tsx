@@ -5,7 +5,6 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
-import Script from "next/script";
 import "./globals.css";
 
 const inter = Inter({
@@ -100,6 +99,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4140052534392830"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body
         className={cn(
           inter.variable,
@@ -113,14 +119,6 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* Google AdSense */}
-          <Script
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4140052534392830"
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
-
           <div className="relative flex min-h-screen flex-col overflow-hidden">
             {/* Soft Blurred Ambient circles for Premium Mesh Gradient */}
             <div
