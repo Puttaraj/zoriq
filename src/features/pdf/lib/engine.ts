@@ -56,6 +56,7 @@ export interface PDFProcessingEngine {
   ): Promise<Blob>;
   imageToPdf(images: File[]): Promise<Blob>;
   pdfToImages(file: File): Promise<string[]>; // Returns array of PNG base64/object URLs
+  pdfPageToImage(file: File, pageNum?: number): Promise<string>;
 
   // Phase 2 (Abstract stubs for API conversions)
   convertToPdf(file: File, fromFormat: string): Promise<Blob>;
@@ -420,6 +421,36 @@ export class BrowserPDFEngine implements PDFProcessingEngine {
     }
 
     return imageUrls;
+  }
+
+  async pdfPageToImage(file: File, pageNum: number = 1): Promise<string> {
+    if (typeof window === "undefined") return "";
+
+    const pdfjs = await import("pdfjs-dist");
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+    const fileBytes = await file.arrayBuffer();
+    const loadingTask = pdfjs.getDocument({ data: fileBytes });
+    const pdf = await loadingTask.promise;
+
+    const pageIndex = Math.min(Math.max(pageNum, 1), pdf.numPages);
+    const page = await pdf.getPage(pageIndex);
+    const viewport = page.getViewport({ scale: 1.0 });
+
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context) return "";
+
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    await page.render({
+      canvasContext: context,
+      viewport,
+      canvas,
+    }).promise;
+
+    return canvas.toDataURL("image/png");
   }
 
   // Phase 2 / API conversions - Expose processing stubs to plug API/AI models without UI revisions

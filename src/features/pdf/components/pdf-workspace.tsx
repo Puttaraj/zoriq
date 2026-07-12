@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Loader2,
   Download,
@@ -11,6 +11,8 @@ import {
   Unlock as UnlockIcon,
   PenTool,
   Image as ImageIcon,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { FileDropzone } from "@/components/shared/file-dropzone";
 import { PDFPageSelector } from "./pdf-page-selector";
@@ -65,6 +67,30 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
     setDownloadBlob(null);
     setSelectedPages([]);
     setSignatureUrl(null);
+  };
+
+  const moveFile = (index: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= files.length) return;
+
+    const newFiles = [...files];
+    const temp = newFiles[index];
+    newFiles[index] = newFiles[targetIndex];
+    newFiles[targetIndex] = temp;
+    setFiles(newFiles);
+  };
+
+  const sortFilesAlphabetically = (order: "asc" | "desc") => {
+    const sorted = [...files].sort((a, b) => {
+      return order === "asc"
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name);
+    });
+    setFiles(sorted);
+  };
+
+  const reverseFilesOrder = () => {
+    setFiles([...files].reverse());
   };
 
   const handleProcess = async () => {
@@ -502,22 +528,80 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
 
             {/* File List Summary */}
             <div className="border-border/60 flex flex-col gap-3 border-t pt-4">
-              <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
-                Files List ({files.length})
-              </span>
-              <div className="border-border/40 bg-muted/10 flex max-h-36 flex-col gap-2 overflow-y-auto rounded-xl border p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
+                  Files List ({files.length})
+                </span>
+                {/* Auto sort control pills when multiple files uploaded */}
+                {multipleFiles && files.length > 1 && (
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => sortFilesAlphabetically("asc")}
+                      className="text-primary px-1 py-0.5 hover:underline"
+                    >
+                      A-Z
+                    </button>
+                    <span className="text-muted-foreground/40">|</span>
+                    <button
+                      type="button"
+                      onClick={() => sortFilesAlphabetically("desc")}
+                      className="text-primary px-1 py-0.5 hover:underline"
+                    >
+                      Z-A
+                    </button>
+                    <span className="text-muted-foreground/40">|</span>
+                    <button
+                      type="button"
+                      onClick={reverseFilesOrder}
+                      className="text-primary px-1 py-0.5 hover:underline"
+                    >
+                      Reverse
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="border-border/40 bg-muted/10 flex max-h-48 flex-col gap-2 overflow-y-auto rounded-xl border p-3">
                 {files.map((file, idx) => (
                   <div
                     key={idx}
                     className="flex items-center justify-between text-xs font-semibold"
                   >
-                    <span className="text-foreground flex max-w-[160px] items-center gap-1 truncate">
-                      <FileText className="text-primary h-3.5 w-3.5" />
+                    <span
+                      className="text-foreground flex max-w-[150px] items-center gap-1 truncate"
+                      title={file.name}
+                    >
+                      <FileText className="text-primary h-3.5 w-3.5 flex-shrink-0" />
                       {file.name}
                     </span>
-                    <span className="text-muted-foreground">
-                      {formatBytes(file.size)}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground mr-1 text-[10px]">
+                        {formatBytes(file.size)}
+                      </span>
+                      {/* Manual Up/Down arrow controllers */}
+                      {multipleFiles && files.length > 1 && (
+                        <div className="border-border/20 bg-card flex items-center rounded border p-0.5">
+                          <button
+                            type="button"
+                            onClick={() => moveFile(idx, "up")}
+                            disabled={idx === 0}
+                            className="text-muted-foreground hover:text-foreground p-0.5 disabled:opacity-30"
+                            aria-label="Move file up"
+                          >
+                            <ChevronUp className="h-3 w-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveFile(idx, "down")}
+                            disabled={idx === files.length - 1}
+                            className="text-muted-foreground hover:text-foreground p-0.5 disabled:opacity-30"
+                            aria-label="Move file down"
+                          >
+                            <ChevronDown className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -596,6 +680,13 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
                     multiple={slug !== "sign-pdf"}
                   />
                 </div>
+              ) : multipleFiles ? (
+                <div className="w-full">
+                  <p className="text-muted-foreground mb-3 text-[10px] leading-relaxed font-semibold">
+                    Visual files list order queue preview:
+                  </p>
+                  <PDFFilesPreview files={files} />
+                </div>
               ) : (
                 <div className="text-muted-foreground flex flex-col items-center justify-center gap-3 text-center">
                   <FileText className="text-primary h-12 w-12" />
@@ -621,6 +712,89 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
         onClose={() => setIsSigModalOpen(false)}
         onSave={setSignatureUrl}
       />
+    </div>
+  );
+}
+
+function PDFFilesPreview({ files }: { files: File[] }) {
+  const [previews, setPreviews] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    let active = true;
+
+    const loadPreviews = async () => {
+      for (const file of files) {
+        if (previews[file.name]) continue; // Skip already loaded previews
+
+        if (file.type === "application/pdf") {
+          setLoading((prev) => ({ ...prev, [file.name]: true }));
+          try {
+            const url = await pdfEngineService.pdfPageToImage(file, 1);
+            if (active) {
+              setPreviews((prev) => ({ ...prev, [file.name]: url }));
+            }
+          } catch (e) {
+            console.error("Preview error", e);
+          } finally {
+            if (active) {
+              setLoading((prev) => ({ ...prev, [file.name]: false }));
+            }
+          }
+        } else if (file.type.startsWith("image/")) {
+          const url = URL.createObjectURL(file);
+          if (active) {
+            setPreviews((prev) => ({ ...prev, [file.name]: url }));
+          }
+        }
+      }
+    };
+
+    loadPreviews();
+
+    return () => {
+      active = false;
+    };
+  }, [files, previews]);
+
+  return (
+    <div className="grid max-h-[60vh] w-full grid-cols-2 gap-4 overflow-y-auto p-1 sm:grid-cols-3">
+      {files.map((file, idx) => (
+        <div
+          key={idx}
+          className="border-border/45 bg-card/60 shadow-soft hover:border-primary/20 relative flex flex-col items-center justify-between rounded-xl border p-3 transition-all duration-300"
+        >
+          {/* Index indicator */}
+          <div className="bg-primary/10 text-primary absolute top-2 left-2 rounded px-1.5 py-0.5 text-[9px] font-bold">
+            {idx + 1}
+          </div>
+          {loading[file.name] ? (
+            <div className="bg-muted/40 mt-4 flex aspect-[3/4] h-28 w-full animate-pulse items-center justify-center rounded">
+              <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
+            </div>
+          ) : previews[file.name] ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={previews[file.name]}
+              alt={file.name}
+              className="border-border/10 mt-4 aspect-[3/4] h-28 rounded border bg-white object-contain shadow-sm"
+            />
+          ) : (
+            <div className="bg-muted/20 mt-4 flex aspect-[3/4] h-28 w-full flex-col items-center justify-center gap-1 rounded">
+              <FileText className="text-muted-foreground/60 h-8 w-8" />
+              <span className="text-muted-foreground text-[8px] font-semibold uppercase">
+                PDF File
+              </span>
+            </div>
+          )}
+          <span
+            className="text-foreground mt-3 max-w-[130px] truncate text-center text-[10px] font-bold"
+            title={file.name}
+          >
+            {file.name}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
