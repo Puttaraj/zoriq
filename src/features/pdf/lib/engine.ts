@@ -113,23 +113,56 @@ export class BrowserPDFEngine implements PDFProcessingEngine {
   }
 
   async compress(file: File, quality: number): Promise<Blob> {
-    // Note: Pure client-side PDF compression is limited to downscaling page dimensions and compressing metadata.
-    // In browser, pdf-lib lets us set compressed metadata and copy pages to minimize bloated index arrays.
+    if (typeof window === "undefined") {
+      const fileBytes = await file.arrayBuffer();
+      const doc = await PDFDocument.load(fileBytes);
+      const pdfBytes = await doc.save();
+      return uint8ArrayToBlob(pdfBytes);
+    }
+
+    // Lazy load pdfjs inside browser context
+    const pdfjs = await import("pdfjs-dist");
+    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+
     const fileBytes = await file.arrayBuffer();
-    const doc = await PDFDocument.load(fileBytes);
+    const loadingTask = pdfjs.getDocument({ data: fileBytes });
+    const pdf = await loadingTask.promise;
 
-    // We copy pages to a fresh document to trim unreferenced layout streams, acting as a basic optimizer
     const compressedDoc = await PDFDocument.create();
-    const copiedPages = await compressedDoc.copyPages(
-      doc,
-      doc.getPageIndices(),
-    );
-    copiedPages.forEach((page) => compressedDoc.addPage(page));
 
-    // Basic scaling if quality is very low
-    if (quality < 50) {
-      compressedDoc.getPages().forEach((page) => {
-        page.scale(0.85, 0.85); // Scale down canvas dimensions slightly to compress resolution size
+    // Scale viewport and recompress images based on quality selection
+    const scale = 0.6 + (quality / 100) * 0.9;
+    const imgQuality = quality / 100;
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale });
+
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      if (!context) continue;
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      await page.render({
+        canvasContext: context,
+        viewport,
+        canvas,
+      }).promise;
+
+      // Render canvas as highly compressed JPEG
+      const imgDataUrl = canvas.toDataURL("image/jpeg", imgQuality);
+      const imgBytes = await fetch(imgDataUrl).then((res) => res.arrayBuffer());
+
+      const newPage = compressedDoc.addPage([viewport.width, viewport.height]);
+      const embeddedImg = await compressedDoc.embedJpg(imgBytes);
+
+      newPage.drawImage(embeddedImg, {
+        x: 0,
+        y: 0,
+        width: viewport.width,
+        height: viewport.height,
       });
     }
 
