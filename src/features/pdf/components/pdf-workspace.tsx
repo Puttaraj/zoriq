@@ -18,6 +18,7 @@ import { FileDropzone } from "@/components/shared/file-dropzone";
 import { PDFPageSelector } from "./pdf-page-selector";
 import { SignaturePadModal } from "./signature-pad-modal";
 import { pdfEngineService, PageNumberOptions } from "../lib/engine";
+import { PDFDocument } from "pdf-lib";
 import { formatBytes } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +36,7 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
   >(null);
 
   // Reusable dynamic settings states
-  const [ranges, setRanges] = useState("1-3"); // Split
+  const [ranges, _setRanges] = useState("1-3"); // Split
   const [quality, setQuality] = useState(80); // Compress
   const [password, setPassword] = useState(""); // Protect/Unlock
   const [watermarkText, setWatermarkText] = useState("CONFIDENTIAL"); // Watermark
@@ -47,6 +48,16 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
   const [selectedPages, setSelectedPages] = useState<number[]>([]); // Page Selector
   const [rotationDegrees, setRotationDegrees] = useState(90); // Rotate
 
+  // Split PDF Settings
+  const [totalPages, setTotalPages] = useState(1);
+  const [splitMode, setSplitMode] = useState<"custom" | "fixed" | "extract">(
+    "custom",
+  );
+  const [customRanges, setCustomRanges] = useState<
+    { from: number; to: number }[]
+  >([]);
+  const [fixedInterval, setFixedInterval] = useState(1);
+
   // Signature Pad state
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
   const [isSigModalOpen, setIsSigModalOpen] = useState(false);
@@ -57,6 +68,22 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
     setSuccess(false);
     setDownloadBlob(null);
     setSelectedPages([]);
+
+    const file = acceptedFiles[0];
+    if (file && file.type === "application/pdf") {
+      const readPages = async () => {
+        try {
+          const fileBytes = await file.arrayBuffer();
+          const doc = await PDFDocument.load(fileBytes);
+          const pagesCount = doc.getPageCount();
+          setTotalPages(pagesCount);
+          setCustomRanges([{ from: 1, to: pagesCount }]);
+        } catch (e) {
+          console.error("Error reading page count", e);
+        }
+      };
+      readPages();
+    }
   }, []);
 
   const handleReset = () => {
@@ -67,6 +94,10 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
     setDownloadBlob(null);
     setSelectedPages([]);
     setSignatureUrl(null);
+    setTotalPages(1);
+    setSplitMode("custom");
+    setCustomRanges([]);
+    setFixedInterval(1);
   };
 
   const moveFile = (index: number, direction: "up" | "down") => {
@@ -106,9 +137,34 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
         case "merge-pdf":
           result = await pdfEngineService.merge(files);
           break;
-        case "split-pdf":
-          result = await pdfEngineService.split(files[0], ranges);
+        case "split-pdf": {
+          let computedRanges = ranges;
+          if (splitMode === "custom") {
+            computedRanges = customRanges
+              .map((r) => `${r.from}-${r.to}`)
+              .filter(Boolean)
+              .join(", ");
+          } else if (splitMode === "fixed") {
+            const calculated = [];
+            for (let i = 1; i <= totalPages; i += fixedInterval) {
+              const end = Math.min(i + fixedInterval - 1, totalPages);
+              calculated.push(`${i}-${end}`);
+            }
+            computedRanges = calculated.join(", ");
+          } else if (splitMode === "extract") {
+            computedRanges = selectedPages
+              .sort((a, b) => a - b)
+              .map((p) => `${p}-${p}`)
+              .join(", ");
+          }
+          if (!computedRanges) {
+            throw new Error(
+              "Please specify at least one valid range or select pages to split.",
+            );
+          }
+          result = await pdfEngineService.split(files[0], computedRanges);
           break;
+        }
         case "compress-pdf":
           result = await pdfEngineService.compress(files[0], quality);
           break;
@@ -271,6 +327,7 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
     "remove-pages",
     "extract-pages",
     "sign-pdf",
+    "split-pdf",
   ].includes(slug);
 
   const isPhase2 = [
@@ -329,20 +386,177 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
 
             {/* Split Settings */}
             {slug === "split-pdf" && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-foreground text-xs font-bold tracking-wider uppercase">
-                  Page Ranges
-                </label>
-                <input
-                  type="text"
-                  value={ranges}
-                  onChange={(e) => setRanges(e.target.value)}
-                  placeholder="e.g. 1-3, 5, 8-10"
-                  className="border-border bg-background focus:border-primary h-10 w-full rounded-lg border px-3 py-2 text-xs font-semibold outline-none"
-                />
-                <p className="text-muted-foreground text-[10px] leading-relaxed">
-                  Enter comma-separated single pages or ranges.
-                </p>
+              <div className="flex flex-col gap-4">
+                {/* Mode Selectors */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-foreground text-xs font-bold tracking-wider uppercase">
+                    Split Mode
+                  </label>
+                  <div className="bg-muted/20 border-border/10 grid grid-cols-3 gap-1.5 rounded-lg border p-1">
+                    {[
+                      { id: "custom", name: "Ranges" },
+                      { id: "fixed", name: "Fixed" },
+                      { id: "extract", name: "Extract" },
+                    ].map((mode) => (
+                      <button
+                        key={mode.id}
+                        type="button"
+                        onClick={() => {
+                          setSplitMode(
+                            mode.id as "custom" | "fixed" | "extract",
+                          );
+                          // Reset selection states
+                          setSelectedPages([]);
+                          if (
+                            mode.id === "custom" &&
+                            customRanges.length === 0
+                          ) {
+                            setCustomRanges([{ from: 1, to: totalPages }]);
+                          }
+                        }}
+                        className={cn(
+                          "rounded-md py-1.5 text-center text-[10px] font-bold transition-all",
+                          splitMode === mode.id
+                            ? "bg-card text-foreground shadow-sm"
+                            : "text-muted-foreground hover:bg-muted/40",
+                        )}
+                      >
+                        {mode.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom Ranges configuration options */}
+                {splitMode === "custom" && (
+                  <div className="flex flex-col gap-3">
+                    <span className="text-foreground text-[10px] font-bold tracking-wider uppercase">
+                      Configure Ranges
+                    </span>
+                    <div className="flex max-h-40 flex-col gap-2 overflow-y-auto pr-1">
+                      {customRanges.map((range, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span className="text-muted-foreground w-12 shrink-0 text-[10px] font-bold">
+                            Range {idx + 1}
+                          </span>
+                          <div className="bg-muted/10 border-border/20 flex w-full items-center gap-1.5 rounded-lg border p-1">
+                            <input
+                              type="number"
+                              min="1"
+                              max={totalPages}
+                              value={range.from}
+                              onChange={(e) => {
+                                const val = Math.min(
+                                  Math.max(Number(e.target.value), 1),
+                                  totalPages,
+                                );
+                                const next = [...customRanges];
+                                next[idx] = { ...next[idx], from: val };
+                                setCustomRanges(next);
+                              }}
+                              className="border-border/20 w-12 border-b bg-transparent text-center text-xs font-semibold focus:outline-none"
+                            />
+                            <span className="text-muted-foreground text-[10px]">
+                              to
+                            </span>
+                            <input
+                              type="number"
+                              min="1"
+                              max={totalPages}
+                              value={range.to}
+                              onChange={(e) => {
+                                const val = Math.min(
+                                  Math.max(Number(e.target.value), 1),
+                                  totalPages,
+                                );
+                                const next = [...customRanges];
+                                next[idx] = { ...next[idx], to: val };
+                                setCustomRanges(next);
+                              }}
+                              className="border-border/20 w-12 border-b bg-transparent text-center text-xs font-semibold focus:outline-none"
+                            />
+                          </div>
+                          {customRanges.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCustomRanges(
+                                  customRanges.filter((_, i) => i !== idx),
+                                );
+                              }}
+                              className="text-muted-foreground hover:text-destructive hover:bg-muted/40 rounded p-1"
+                              title="Delete Range"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const lastRange = customRanges[customRanges.length - 1];
+                        const nextStart = lastRange
+                          ? Math.min(lastRange.to + 1, totalPages)
+                          : 1;
+                        setCustomRanges([
+                          ...customRanges,
+                          { from: nextStart, to: totalPages },
+                        ]);
+                      }}
+                      className="border-border/60 hover:border-primary/40 bg-card hover:bg-primary/5 text-muted-foreground hover:text-primary w-full rounded-lg border border-dashed py-2 text-center text-[10px] font-bold transition-all"
+                    >
+                      + Add Range
+                    </button>
+                  </div>
+                )}
+
+                {/* Fixed Interval configurations */}
+                {splitMode === "fixed" && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-foreground text-xs font-bold tracking-wider uppercase">
+                      Split in intervals of
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        max={totalPages}
+                        value={fixedInterval}
+                        onChange={(e) => {
+                          const val = Math.min(
+                            Math.max(Number(e.target.value), 1),
+                            totalPages,
+                          );
+                          setFixedInterval(val);
+                        }}
+                        className="border-border bg-background focus:border-primary h-10 w-24 rounded-lg border px-3 py-2 text-center text-xs font-semibold outline-none"
+                      />
+                      <span className="text-muted-foreground text-xs font-medium">
+                        pages
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground mt-1 text-[10px] leading-relaxed">
+                      Every {fixedInterval}{" "}
+                      {fixedInterval === 1 ? "page" : "pages"} of the uploaded
+                      PDF file will be split into a separate document (creating{" "}
+                      {Math.ceil(totalPages / fixedInterval)} files).
+                    </p>
+                  </div>
+                )}
+
+                {/* Extract configurations */}
+                {splitMode === "extract" && (
+                  <div className="bg-primary/5 border-primary/10 text-muted-foreground rounded-lg border p-3.5 text-xs leading-relaxed font-semibold">
+                    <p className="text-primary mb-1 font-bold">
+                      Interactive Page Selection:
+                    </p>
+                    Select page checkmarks in the Document Preview panel on the
+                    right. Each selected page will be split and extracted into a
+                    separate PDF file.
+                  </div>
+                )}
               </div>
             )}
 
@@ -671,13 +885,18 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
                   <p className="text-muted-foreground mb-3 text-[10px] leading-relaxed font-semibold">
                     {slug === "sign-pdf"
                       ? "Select the page you wish to stamp your signature signature pad placement:"
-                      : "Check the pages you wish to manipulate/extract:"}
+                      : slug === "split-pdf"
+                        ? splitMode === "extract"
+                          ? "Select the pages you wish to extract as individual PDF files:"
+                          : "Page thumbnails reference (all pages will be split according to range parameters defined):"
+                        : "Check the pages you wish to manipulate/extract:"}
                   </p>
                   <PDFPageSelector
                     file={files[0]}
                     selectedPages={selectedPages}
                     onSelectionChange={setSelectedPages}
                     multiple={slug !== "sign-pdf"}
+                    readOnly={slug === "split-pdf" && splitMode !== "extract"}
                   />
                 </div>
               ) : multipleFiles ? (

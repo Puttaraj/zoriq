@@ -10,6 +10,7 @@ interface PDFPageSelectorProps {
   selectedPages: number[];
   onSelectionChange: (pages: number[]) => void;
   multiple?: boolean;
+  readOnly?: boolean;
 }
 
 export function PDFPageSelector({
@@ -17,6 +18,7 @@ export function PDFPageSelector({
   selectedPages,
   onSelectionChange,
   multiple = true,
+  readOnly = false,
 }: PDFPageSelectorProps) {
   const [pages, setPages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -82,7 +84,7 @@ export function PDFPageSelector({
   return (
     <div className="space-y-4">
       {/* Top Action Bar */}
-      {multiple && pages.length > 0 && (
+      {multiple && pages.length > 0 && !readOnly && (
         <div className="border-border/40 flex items-center justify-between border-b pb-3">
           <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
             Select Pages ({selectedPages.length} of {pages.length} selected)
@@ -116,20 +118,27 @@ export function PDFPageSelector({
           return (
             <div
               key={pageNum}
-              onClick={() => handleTogglePage(pageNum)}
+              onClick={() => !readOnly && handleTogglePage(pageNum)}
               className={cn(
-                "group border-border/40 bg-card/60 hover:border-primary/40 shadow-soft relative flex cursor-pointer flex-col overflow-hidden rounded-xl border p-2 transition-all duration-300",
-                isSelected && "border-primary bg-primary/5 shadow-md",
+                "group border-border/40 bg-card/60 shadow-soft relative flex flex-col overflow-hidden rounded-xl border p-2 transition-all duration-300",
+                readOnly
+                  ? "cursor-default"
+                  : "hover:border-primary/40 cursor-pointer",
+                isSelected &&
+                  !readOnly &&
+                  "border-primary bg-primary/5 shadow-md",
               )}
             >
               {/* Checkbox state top-left */}
-              <div className="absolute top-2 left-2 z-10">
-                {isSelected ? (
-                  <CheckSquare className="text-primary fill-primary/10 h-4 w-4" />
-                ) : (
-                  <Square className="text-muted-foreground/40 group-hover:text-muted-foreground/60 h-4 w-4" />
-                )}
-              </div>
+              {!readOnly && (
+                <div className="absolute top-2 left-2 z-10">
+                  {isSelected ? (
+                    <CheckSquare className="text-primary fill-primary/10 h-4 w-4" />
+                  ) : (
+                    <Square className="text-muted-foreground/40 group-hover:text-muted-foreground/60 h-4 w-4" />
+                  )}
+                </div>
+              )}
 
               {/* Page Number Badge top-right */}
               <div className="bg-muted/90 text-muted-foreground absolute top-2 right-2 z-10 rounded px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase">
