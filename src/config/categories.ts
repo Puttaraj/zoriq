@@ -48,7 +48,7 @@ export const categories: CategoryConfig[] = [
       "Compress, merge, split, and convert PDFs. Coming soon with AI-powered features.",
     icon: "FileText",
     color: "from-orange-500 to-amber-600",
-    toolCount: 0,
+    toolCount: 26,
   },
   {
     slug: "ai",

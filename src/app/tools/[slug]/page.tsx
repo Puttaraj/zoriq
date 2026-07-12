@@ -105,6 +105,15 @@ import * as emiFeature from "@/features/emi-calculator";
 import * as compressorFeature from "@/features/image-compressor";
 import * as converterFeature from "@/features/image-converter";
 
+const PDFWorkspace = dynamic(
+  () => import("@/features/pdf").then((m) => m.PDFWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+
 // Map slugs to feature configurations
 const featureMap: Record<
   string,
@@ -181,10 +190,50 @@ export async function generateMetadata({
 export default async function ToolPage({ params }: ToolPageProps) {
   const { slug } = await params;
   const tool = getToolBySlug(slug);
-  const feature = featureMap[slug];
-
-  if (!tool || !feature) {
+  if (!tool) {
     notFound();
+  }
+
+  let Workspace: React.ComponentType;
+  let feature: {
+    seoContent?: string;
+    faqs?: { question: string; answer: string }[];
+  } = {};
+
+  if (tool.category === "pdf") {
+    const PDFWorkspaceWrapper = function PDFWorkspaceWrapper() {
+      return <PDFWorkspace slug={slug} />;
+    };
+    Workspace = PDFWorkspaceWrapper;
+    feature.seoContent = `
+## About ${tool.name}
+ZORIQ ${tool.name} is a high-performance utility designed to manipulate documents directly inside your browser. Built with local client-side libraries, it requires zero files upload to a server.
+
+## Key Features
+${tool.features.map((f) => `* **${f.split(" — ")[0] || f}**: ${f.split(" — ")[1] || ""}`).join("\n")}
+
+## Clean Workflow Directives
+1. **Load Files**: Drag & drop or browse your local system.
+2. **Apply Options**: Choose page ranges, passwords, or drawings.
+3. **Execute Compiler**: Click run to trigger processing.
+4. **Immediate Saving**: Click download to save the processed file.
+    `;
+    feature.faqs = tool.features
+      .map((f) => ({
+        question: `Does ZORIQ ${tool.name} support ${f.split(" — ")[0].toLowerCase()}?`,
+        answer: `Yes, ZORIQ ${tool.name} has complete, integrated support for ${f.toLowerCase()} directly inside your web browser.`,
+      }))
+      .slice(0, 3);
+  } else {
+    const featureData = featureMap[slug];
+    if (!featureData) {
+      notFound();
+    }
+    Workspace = featureData.workspace;
+    feature = {
+      seoContent: featureData.seoContent,
+      faqs: featureData.faqs,
+    };
   }
 
   const category = getCategoryBySlug(tool.category);
@@ -197,8 +246,6 @@ export default async function ToolPage({ params }: ToolPageProps) {
     },
     { label: tool.name },
   ];
-
-  const Workspace = feature.workspace;
 
   // Simple Markdown to HTML parser for SEO Content rendering
   const parseMarkdown = (md: string) => {
@@ -267,7 +314,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(generateFAQSchema(feature.faqs)),
+          __html: JSON.stringify(generateFAQSchema(feature.faqs || [])),
         }}
       />
       <script
