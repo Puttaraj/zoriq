@@ -393,7 +393,7 @@ export class BrowserPDFEngine implements PDFProcessingEngine {
     const pdfjs = await import("pdfjs-dist");
 
     // Set worker unpkg URL based on current version
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
     const fileBytes = await file.arrayBuffer();
     const loadingTask = pdfjs.getDocument({ data: fileBytes });
@@ -427,7 +427,7 @@ export class BrowserPDFEngine implements PDFProcessingEngine {
     if (typeof window === "undefined") return "";
 
     const pdfjs = await import("pdfjs-dist");
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
     const fileBytes = await file.arrayBuffer();
     const loadingTask = pdfjs.getDocument({ data: fileBytes });
