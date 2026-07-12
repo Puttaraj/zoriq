@@ -323,12 +323,7 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
     ? ["image/jpeg", "image/png", "image/webp"]
     : ["application/pdf"];
 
-  const showPageSelector = [
-    "remove-pages",
-    "extract-pages",
-    "sign-pdf",
-    "split-pdf",
-  ].includes(slug);
+  const showPageSelector = !multipleFiles && files.length > 0;
 
   const isPhase2 = [
     "word-to-pdf",
@@ -561,20 +556,45 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
             )}
 
             {/* Quality Slider Settings (Compress) */}
-            {slug === "compress-pdf" && (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between text-xs font-bold tracking-wider uppercase">
-                  <span className="text-foreground">DPI Quality</span>
-                  <span className="text-primary font-mono">{quality}%</span>
+            {slug === "compress-pdf" && files[0] && (
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between text-xs font-bold tracking-wider uppercase">
+                    <span className="text-foreground">DPI Quality</span>
+                    <span className="text-primary font-mono">{quality}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="20"
+                    max="100"
+                    value={quality}
+                    onChange={(e) => setQuality(Number(e.target.value))}
+                    className="bg-muted accent-primary h-2 w-full cursor-pointer appearance-none rounded-full focus:outline-none"
+                  />
                 </div>
-                <input
-                  type="range"
-                  min="20"
-                  max="100"
-                  value={quality}
-                  onChange={(e) => setQuality(Number(e.target.value))}
-                  className="bg-muted accent-primary h-2 w-full cursor-pointer appearance-none rounded-full focus:outline-none"
-                />
+                <div className="border-primary/10 bg-primary/5 rounded-xl border p-3 text-xs leading-relaxed font-semibold">
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      Original Size:
+                    </span>
+                    <span className="text-foreground font-mono">
+                      {formatBytes(files[0].size)}
+                    </span>
+                  </div>
+                  <div className="text-primary flex items-center justify-between font-bold">
+                    <span>Estimated Size:</span>
+                    <span className="font-mono">
+                      ~
+                      {formatBytes(
+                        files[0].size * (0.15 + (quality / 100) * 0.8),
+                      )}
+                    </span>
+                  </div>
+                  <p className="text-muted-foreground/80 mt-1 text-[10px] leading-relaxed font-medium">
+                    Estimated savings:{" "}
+                    {Math.round((1 - (0.15 + (quality / 100) * 0.8)) * 100)}%
+                  </p>
+                </div>
               </div>
             )}
 
@@ -885,18 +905,27 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
                   <p className="text-muted-foreground mb-3 text-[10px] leading-relaxed font-semibold">
                     {slug === "sign-pdf"
                       ? "Select the page you wish to stamp your signature signature pad placement:"
-                      : slug === "split-pdf"
-                        ? splitMode === "extract"
-                          ? "Select the pages you wish to extract as individual PDF files:"
-                          : "Page thumbnails reference (all pages will be split according to range parameters defined):"
-                        : "Check the pages you wish to manipulate/extract:"}
+                      : ["remove-pages", "extract-pages"].includes(slug)
+                        ? "Check the pages you wish to manipulate/extract:"
+                        : slug === "split-pdf"
+                          ? splitMode === "extract"
+                            ? "Select the pages you wish to extract as individual PDF files:"
+                            : "Page thumbnails reference (all pages will be split according to range parameters defined):"
+                          : "Document page reference previews (all edits apply to the entire document):"}
                   </p>
                   <PDFPageSelector
                     file={files[0]}
                     selectedPages={selectedPages}
                     onSelectionChange={setSelectedPages}
                     multiple={slug !== "sign-pdf"}
-                    readOnly={slug === "split-pdf" && splitMode !== "extract"}
+                    readOnly={
+                      !(
+                        ["remove-pages", "extract-pages", "sign-pdf"].includes(
+                          slug,
+                        ) ||
+                        (slug === "split-pdf" && splitMode === "extract")
+                      )
+                    }
                   />
                 </div>
               ) : multipleFiles ? (
