@@ -10,7 +10,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { searchTools, tools } from "@/config/tools";
+import { searchTools, tools, getToolsByCategory } from "@/config/tools";
 import { categories } from "@/config/categories";
 import { cn } from "@/lib/utils";
 import type { ToolConfig } from "@/types/tool";
@@ -43,6 +43,10 @@ export function SearchBar({
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const currentCategory = categories.find((c) => c.slug === categoryFilter);
+  const categoryTools =
+    categoryFilter !== "all" ? getToolsByCategory(categoryFilter) : [];
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -96,7 +100,7 @@ export function SearchBar({
       setQuery(value);
       setSelectedIndex(-1);
 
-      if (value.trim().length >= 1 || cat !== "all") {
+      if (value.trim().length >= 1) {
         setLoading(true);
         // Simulate high-performance search latency
         const timer = setTimeout(() => {
@@ -109,6 +113,10 @@ export function SearchBar({
           setLoading(false);
         }, 80);
         return () => clearTimeout(timer);
+      } else if (cat !== "all") {
+        setResults(getToolsByCategory(cat));
+        setIsOpen(true);
+        setLoading(false);
       } else {
         setResults([]);
         setLoading(false);
@@ -121,6 +129,8 @@ export function SearchBar({
   const handleCategorySelect = (cat: string) => {
     setCategoryFilter(cat);
     handleSearch(query, cat);
+    setIsOpen(true);
+    inputRef.current?.focus();
   };
 
   const handleSelect = useCallback(
@@ -268,10 +278,10 @@ export function SearchBar({
               ))}
           </div>
 
-          {/* If query is empty -> Show Recent & Popular searches */}
+          {/* If query is empty -> Show Recent & Popular or Category-specific recommendations */}
           {!query && (
             <div className="flex flex-col gap-4 p-4">
-              {recent.length > 0 && (
+              {recent.length > 0 && categoryFilter === "all" && (
                 <div>
                   <h4 className="text-muted-foreground mb-2 flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase">
                     <History className="h-3 w-3" />
@@ -306,18 +316,26 @@ export function SearchBar({
               <div>
                 <h4 className="text-muted-foreground mb-2 flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase">
                   <Sparkles className="h-3 w-3" />
-                  Popular Searches
+                  {categoryFilter === "all"
+                    ? "Popular Searches"
+                    : `Recommended in ${currentCategory?.name || "Category"}`}
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {POPULAR_TAGS.map((tag) => (
+                  {(categoryFilter === "all"
+                    ? POPULAR_TAGS
+                    : categoryTools.slice(0, 8).map((t) => ({
+                        name: t.name,
+                        slug: t.slug,
+                      }))
+                  ).map((tag) => (
                     <button
                       key={tag.slug}
                       type="button"
                       onClick={() => handleSelect(tag.slug, tag.name)}
-                      className="border-border text-muted-foreground hover:text-foreground hover:border-primary/30 flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-all"
+                      className="border-border text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-primary/5 flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all"
                     >
-                      {tag.name}
-                      <ArrowRight className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
+                      <span>{tag.name}</span>
+                      <ArrowRight className="h-3 w-3 opacity-60 transition-opacity group-hover:opacity-100" />
                     </button>
                   ))}
                 </div>
@@ -325,9 +343,14 @@ export function SearchBar({
             </div>
           )}
 
-          {/* Results List */}
-          {query && results.length > 0 && (
-            <div className="p-1">
+          {/* Results List: displays search matches OR all tools for the selected category */}
+          {results.length > 0 && (
+            <div className="border-border/30 border-t p-1">
+              <div className="text-muted-foreground px-3 py-1.5 text-[10px] font-bold tracking-wider uppercase">
+                {query
+                  ? `Search Results (${results.length})`
+                  : `All ${currentCategory?.name || "Category Tools"} (${results.length})`}
+              </div>
               {results.slice(0, 6).map((tool, idx) => (
                 <button
                   key={tool.slug}
@@ -336,7 +359,7 @@ export function SearchBar({
                   aria-selected={selectedIndex === idx}
                   onClick={() => handleSelect(tool.slug, tool.name)}
                   className={cn(
-                    "flex w-full items-center justify-between gap-3 rounded-lg px-4 py-3 text-left transition-colors",
+                    "flex w-full items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-left transition-colors",
                     selectedIndex === idx
                       ? "bg-primary/10 text-primary"
                       : "hover:bg-muted",
