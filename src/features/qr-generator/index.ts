@@ -1,5 +1,8 @@
 export { QrWorkspace } from "./components/qr-workspace";
 export const seoContent = `
+## Free QR Code Generator Online
+Need a free QR code generator online with no sign up and no expiration? ZORIQ allows you to generate unlimited static QR codes for website links, WiFi networks, vCards, and emails with custom colors and downloadable high-resolution PNG or SVG vector files.
+
 ## What is a QR Code?
 A Quick Response (QR) code is a type of two-dimensional matrix barcode that can store data such as website links, contact cards, WiFi access parameters, text, or email triggers. When scanned by a smartphone camera, the data is decoded instantly, initiating the corresponding action (like opening a browser or logging into a network).
 

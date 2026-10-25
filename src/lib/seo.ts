@@ -9,23 +9,184 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 import type { ToolConfig, FAQ, BreadcrumbItem, SchemaOrg } from "@/types/tool";
 
+const TOOL_SEO_OVERRIDES: Record<
+  string,
+  { title: string; description: string; keywords?: string[] }
+> = {
+  "qr-generator": {
+    title: "Free QR Code Generator Online (Custom Colors & SVG) — ZORIQ",
+    description:
+      "Generate free QR codes online instantly. Create QR codes for URLs, WiFi networks, vCards, and emails. Customize colors, add logos, and download in PNG or SVG vector format.",
+    keywords: [
+      "qr code generator online",
+      "free qr code generator online",
+      "qr code generator",
+      "create qr code",
+      "wifi qr code generator",
+      "svg qr code",
+      "custom qr code generator",
+    ],
+  },
+  "password-generator": {
+    title: "Strong Password Generator Online — 100% Private & Secure — ZORIQ",
+    description:
+      "Generate strong, secure, random passwords online instantly. Customize length, symbols, numbers, and uppercase letters. 100% client-side privacy with zero data saved.",
+    keywords: [
+      "password online",
+      "password generator online",
+      "free password generator",
+      "generate password online",
+      "create strong password",
+      "random password generator",
+      "free passwords",
+    ],
+  },
+  "uuid-generator": {
+    title: "UUID Generator Online — Create Unique ID (Bulk v4 UUIDs) — ZORIQ",
+    description:
+      "Generate random UUID v4 identifiers online instantly. Create unique IDs for databases, APIs, and software development. Supports single and bulk UUID generation.",
+    keywords: [
+      "uuid generator",
+      "create unique id",
+      "uuid generator online",
+      "uuid v4 generator",
+      "random uuid generator",
+      "bulk uuid generator",
+    ],
+  },
+  "json-formatter": {
+    title:
+      "JSON Formatter & Validator Online — Beautify & Simplify JSON — ZORIQ",
+    description:
+      "Format, validate, beautify, and simplify JSON online instantly. Highlights syntax errors with exact line numbers and minifies payloads. 100% browser-based.",
+    keywords: [
+      "json formatter on line",
+      "online formatter",
+      "json formatter online",
+      "simplify json",
+      "validate json online",
+      "json validator online",
+      "beautify json",
+    ],
+  },
+  "image-compressor": {
+    title: "Free Image Compressor Online — Compress JPG, PNG & WebP — ZORIQ",
+    description:
+      "Compress images online without losing quality. Reduce file sizes for JPG, PNG, and WebP photos directly in your browser. Fast, free, and 100% private.",
+    keywords: [
+      "image compressor",
+      "compress image online",
+      "reduce image size",
+      "compress photo online",
+      "jpeg compressor",
+      "png compressor",
+    ],
+  },
+  "compress-image-to-20kb": {
+    title: "Compress Image to 20KB Online — For SSC, UPSC & Govt Forms — ZORIQ",
+    description:
+      "Reduce photo and signature sizes strictly under 20KB for government exam application forms (SSC, UPSC, IBPS, State PSC). 100% client-side in-browser compression.",
+    keywords: [
+      "compress image to 20kb",
+      "compress photo to 20kb",
+      "signature compress to 20kb",
+      "image under 20kb online",
+      "ssc photo resize",
+    ],
+  },
+  "compress-image-to-50kb": {
+    title: "Compress Image to 50KB Online — Passport Photo Size — ZORIQ",
+    description:
+      "Reduce passport photos and ID proofs strictly under 50KB for online portals, exam registration, and visa forms without losing facial clarity.",
+    keywords: [
+      "compress image to 50kb",
+      "compress photo to 50kb",
+      "passport size photo 50kb",
+      "image under 50kb",
+    ],
+  },
+  "merge-pdf": {
+    title: "Merge PDF Online — Combine Multiple PDF Files Free — ZORIQ",
+    description:
+      "Combine and merge multiple PDF documents into a single file online. Reorder pages visually with instant preview. 100% free and processed in your browser.",
+    keywords: [
+      "merge pdf",
+      "merge pdf online",
+      "combine pdf files",
+      "join pdf online free",
+      "combine multiple pdfs",
+    ],
+  },
+  "split-pdf": {
+    title: "Split PDF Online — Extract Pages & Custom Ranges Free — ZORIQ",
+    description:
+      "Split PDF files into individual pages or custom page ranges online. Visual page preview selection with zero server uploads.",
+    keywords: [
+      "split pdf",
+      "split pdf online",
+      "extract pdf pages",
+      "separate pdf pages",
+    ],
+  },
+  "compress-pdf": {
+    title: "Compress PDF Online — Reduce PDF File Size Free — ZORIQ",
+    description:
+      "Reduce PDF file sizes online while maintaining visual resolution. Real-time file size estimator and 100% private in-browser compression.",
+    keywords: [
+      "compress pdf",
+      "compress pdf online",
+      "reduce pdf file size",
+      "pdf compressor free",
+    ],
+  },
+  "age-calculator": {
+    title:
+      "Age Calculator Online — Calculate Exact Age in Years, Months, Days — ZORIQ",
+    description:
+      "Calculate your exact chronological age in years, months, weeks, days, hours, and minutes from date of birth. Free online date calculation tool.",
+    keywords: [
+      "age calculator online",
+      "calculate age online",
+      "exact age calculator",
+      "date of birth calculator",
+    ],
+  },
+  "word-counter": {
+    title: "Word & Character Counter Online — Real-Time Text Stats — ZORIQ",
+    description:
+      "Count words, characters, sentences, paragraphs, and reading time in real-time. Free online text analyzer for writers, students, and SEOs.",
+    keywords: [
+      "word counter online",
+      "character counter",
+      "word count tool",
+      "count words in text",
+    ],
+  },
+};
+
 /**
  * Generate Metadata for a tool page.
  */
 export function generateToolMetadata(tool: ToolConfig): Metadata {
-  const title = `${tool.name} — Free Online ${tool.name} | ZORIQ`;
+  const override = TOOL_SEO_OVERRIDES[tool.slug];
+  const title =
+    override?.title ?? `Free ${tool.name} Online — Fast & Private | ZORIQ`;
+  const description = override?.description ?? tool.description;
+  const keywords = override?.keywords ?? tool.keywords;
   const url = `${siteConfig.url}/tools/${tool.slug}`;
 
   return {
-    title,
-    description: tool.description,
-    keywords: tool.keywords,
+    title: {
+      absolute: title,
+    },
+    description,
+    keywords,
     alternates: {
       canonical: url,
     },
     openGraph: {
       title,
-      description: tool.description,
+      description,
       url,
       siteName: siteConfig.name,
       type: "website",
@@ -41,7 +202,7 @@ export function generateToolMetadata(tool: ToolConfig): Metadata {
     twitter: {
       card: "summary_large_image",
       title,
-      description: tool.description,
+      description,
       images: [`${siteConfig.url}/og/${tool.slug}.png`],
     },
     robots: {

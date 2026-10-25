@@ -1,5 +1,8 @@
 export { UuidWorkspace } from "./components/uuid-workspace";
 export const seoContent = `
+## Free Online UUID Generator & Unique ID Creator
+Need to create unique ID strings or bulk random UUIDs for your database, API, or application? ZORIQ UUID Generator generates RFC 4122 compliant Version 4 UUIDs instantly in your browser with zero latency and 100% cryptographic randomness.
+
 ## What is a UUID?
 A UUID (Universally Unique Identifier) is a 128-bit value used to uniquely identify information in computer systems. Because UUIDs have a very high level of uniqueness, they can be generated independently without contact with a central registration authority or coordination between systems.
 

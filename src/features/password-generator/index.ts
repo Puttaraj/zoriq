@@ -1,5 +1,8 @@
 export { PasswordWorkspace } from "./components/password-workspace";
 export const seoContent = `
+## Strong Password Generator Online — Free & 100% Private
+Generate strong, secure, random passwords online with customizable length, symbols, numbers, and uppercase characters. Powered by browser Web Crypto API for 100% private client-side password creation with zero server storage.
+
 ## Why You Need a Strong Password Generator
 A password generator helps protect your online identity by generating secure, unpredictable passwords that cannot be easily guessed or cracked by automated hacking tools. Using a single, weak password across multiple accounts makes your data vulnerable. A random password creator solves this by creating distinct, highly secure credentials for every site you use.
 

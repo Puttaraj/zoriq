@@ -1,5 +1,8 @@
 export { JsonWorkspace } from "./components/json-workspace";
 export const seoContent = `
+## Online JSON Formatter & Validator — Simplify JSON Fast
+Need a fast online JSON formatter to simplify, beautify, and validate complex API payloads? ZORIQ formats raw and minified JSON into clean, indented code, detects syntax errors with line numbers, and minifies payloads 100% locally in your browser.
+
 ## What is JSON?
 JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write, and easy for machines to parse and generate. It is based on a subset of the JavaScript Programming Language and is the standard format for API communication, data configuration, and modern software state storage.
 
