@@ -26,10 +26,10 @@ export default function PrivacyPage() {
             Policy outlines how we handle files, data, and information when you
             access our online utility platform located at{" "}
             <a
-              href="https://zoriq.co.in"
+              href="https://www.zoriq.co.in"
               className="text-primary hover:underline"
             >
-              https://zoriq.co.in
+              https://www.zoriq.co.in
             </a>
             .
           </p>

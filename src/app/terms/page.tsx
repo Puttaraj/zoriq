@@ -25,10 +25,10 @@ export default function TermsPage() {
             Welcome to ZORIQ (&quot;we&quot;, &quot;us&quot;, or
             &quot;our&quot;). By accessing or using our platform at{" "}
             <a
-              href="https://zoriq.co.in"
+              href="https://www.zoriq.co.in"
               className="text-primary hover:underline"
             >
-              https://zoriq.co.in
+              https://www.zoriq.co.in
             </a>{" "}
             (the &quot;Site&quot;) and its associated browser-based tools, you
             agree to comply with and be bound by the following Terms of Service.

@@ -10,8 +10,14 @@ export const siteConfig = {
   tagline: "Fast, Secure, AI-Powered Online Tools",
   description:
     "Free online tools for everyone — compress images, generate QR codes, format JSON, calculate EMI, and 100+ more utilities. Fast, secure, and beautifully designed.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://zoriq.co.in",
-  domain: "zoriq.co.in",
+  url:
+    process.env.NODE_ENV === "production"
+      ? "https://www.zoriq.co.in"
+      : (process.env.NEXT_PUBLIC_SITE_URL?.replace(
+          "https://zoriq.co.in",
+          "https://www.zoriq.co.in",
+        ) ?? "https://www.zoriq.co.in"),
+  domain: "www.zoriq.co.in",
 
   /** Open Graph defaults */
   ogImage: "/og/default.png",
@@ -39,8 +45,8 @@ export const siteConfig = {
   /** Metadata for Schema.org Organization */
   organization: {
     name: "ZORIQ",
-    url: "https://zoriq.co.in",
-    logo: "https://zoriq.co.in/icons/logo.svg",
+    url: "https://www.zoriq.co.in",
+    logo: "https://www.zoriq.co.in/icons/logo.svg",
     foundingDate: "2026",
   },
 

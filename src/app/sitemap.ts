@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { tools } from "@/config/tools";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://zoriq.co.in";
+  const baseUrl = "https://www.zoriq.co.in";
 
   // Static marketing and directory pages
   const staticPages: MetadataRoute.Sitemap = [

@@ -17,7 +17,7 @@ type QrType = "url" | "wifi" | "email" | "vcard" | "text";
 
 export function QrWorkspace() {
   const [qrType, setQrType] = useState<QrType>("url");
-  const [urlValue, setUrlValue] = useState("https://zoriq.co.in");
+  const [urlValue, setUrlValue] = useState("https://www.zoriq.co.in");
   const [textValue, setTextValue] = useState("");
 
   // WiFi state
@@ -53,7 +53,7 @@ export function QrWorkspace() {
   const getPayload = useCallback(() => {
     switch (qrType) {
       case "url":
-        return urlValue || "https://zoriq.co.in";
+        return urlValue || "https://www.zoriq.co.in";
       case "text":
         return textValue || "ZORIQ Tools";
       case "wifi":
