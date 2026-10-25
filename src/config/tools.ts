@@ -137,6 +137,35 @@ export const tools: ToolConfig[] = [
     ],
   },
 
+  {
+    slug: "jwt-decoder",
+    name: "JWT Decoder & Debugger",
+    description:
+      "Decode and inspect JSON Web Tokens (JWT) safely in your browser. View header, payload claims, and token expiration countdown. 100% private.",
+    shortDescription: "Decode and inspect JSON Web Tokens locally",
+    category: "developer",
+    icon: "KeyRound",
+    features: [
+      "Decode Header, Payload, and Signature",
+      "Real-time expiration countdown and status indicator",
+      "Format JSON claims with syntax colors",
+      "One-click copy for payload data",
+      "Zero network requests — 100% private browser decoding",
+    ],
+    inputType: "text",
+    processingLocation: "client",
+    isNew: true,
+    relatedTools: ["json-formatter", "password-generator", "uuid-generator"],
+    schemaType: "WebApplication",
+    keywords: [
+      "jwt decoder",
+      "jwt debugger",
+      "decode jwt",
+      "jwt token parser",
+      "jwt online",
+    ],
+  },
+
   // ──────────────────────────────────
   // Text / Student Tools
   // ──────────────────────────────────
@@ -231,6 +260,35 @@ export const tools: ToolConfig[] = [
     ],
   },
 
+  {
+    slug: "sip-calculator",
+    name: "SIP Calculator",
+    description:
+      "Calculate your mutual fund SIP returns and future wealth value. Interactive monthly compounding calculator with visual chart and annual schedule.",
+    shortDescription: "Calculate mutual fund SIP returns & wealth growth",
+    category: "finance",
+    icon: "TrendingUp",
+    features: [
+      "Instant monthly compounding calculations",
+      "Visual donut chart breakdown (Invested vs Returns)",
+      "Year-by-year wealth projection table",
+      "Adjustable monthly amount, tenure, and expected return rate",
+      "100% free with zero sign-up required",
+    ],
+    inputType: "form",
+    processingLocation: "client",
+    isNew: true,
+    relatedTools: ["emi-calculator", "age-calculator"],
+    schemaType: "WebApplication",
+    keywords: [
+      "sip calculator",
+      "mutual fund sip calculator",
+      "sip return calculator",
+      "investment calculator",
+      "systematic investment plan",
+    ],
+  },
+
   // ──────────────────────────────────
   // Image Tools
   // ──────────────────────────────────
@@ -295,6 +353,171 @@ export const tools: ToolConfig[] = [
       "png to jpg",
       "jpg to png",
       "webp converter",
+    ],
+  },
+
+  {
+    slug: "compress-image-to-20kb",
+    name: "Compress Image to 20KB",
+    description:
+      "Compress and resize images to under 20KB online. Perfect for SSC, UPSC, government exam forms, and signatures. 100% free and private.",
+    shortDescription: "Compress photo or signature to under 20KB",
+    category: "image",
+    icon: "ImageDown",
+    features: [
+      "Compress photos and signatures strictly under 20 KB",
+      "Ideal for SSC, UPSC, and online exam application portals",
+      "Adjustable quality fallback slider",
+      "Instant before-and-after file size comparison",
+      "Safe local browser compression — no upload to any server",
+    ],
+    inputType: "file",
+    acceptedFormats: ["image/jpeg", "image/png", "image/webp"],
+    maxFileSize: 10 * 1024 * 1024,
+    processingLocation: "client",
+    isNew: true,
+    relatedTools: [
+      "compress-image-to-50kb",
+      "image-compressor",
+      "image-converter",
+    ],
+    schemaType: "WebApplication",
+    keywords: [
+      "compress image to 20kb",
+      "reduce image size to 20kb",
+      "photo compress 20kb",
+      "signature resize 20kb",
+      "image under 20kb",
+    ],
+  },
+
+  {
+    slug: "compress-image-to-50kb",
+    name: "Compress Image to 50KB",
+    description:
+      "Compress and resize images to under 50KB online. Ideal for passport photos, college admissions, and portal registrations. Fast and free.",
+    shortDescription: "Compress photo to under 50KB for portals",
+    category: "image",
+    icon: "ImageDown",
+    features: [
+      "Compress images strictly under 50 KB",
+      "Optimized for passport photos, admit cards, and job portals",
+      "Maintains facial clarity and aspect ratio",
+      "Real-time compression preview",
+      "Processed 100% inside your browser memory",
+    ],
+    inputType: "file",
+    acceptedFormats: ["image/jpeg", "image/png", "image/webp"],
+    maxFileSize: 10 * 1024 * 1024,
+    processingLocation: "client",
+    isNew: true,
+    relatedTools: [
+      "compress-image-to-20kb",
+      "image-compressor",
+      "image-converter",
+    ],
+    schemaType: "WebApplication",
+    keywords: [
+      "compress image to 50kb",
+      "reduce photo size to 50kb",
+      "passport photo 50kb",
+      "image resize 50kb",
+      "compress jpg to 50kb",
+    ],
+  },
+
+  // ──────────────────────────────────
+  // AI Tools
+  // ──────────────────────────────────
+  {
+    slug: "background-remover",
+    name: "AI Background Remover",
+    description:
+      "Remove image backgrounds automatically in your browser. Create transparent PNG cutouts for portraits, products, and graphics. 100% free and private.",
+    shortDescription: "Remove image backgrounds instantly in browser",
+    category: "ai",
+    icon: "Sparkles",
+    features: [
+      "Remove photo backgrounds automatically",
+      "100% private — processed locally on your device",
+      "Export high-resolution transparent PNG cutouts",
+      "Solid white or black background replacement modes",
+      "No image uploads to external cloud servers",
+    ],
+    inputType: "file",
+    acceptedFormats: ["image/jpeg", "image/png", "image/webp"],
+    maxFileSize: 10 * 1024 * 1024,
+    processingLocation: "client",
+    isNew: true,
+    relatedTools: ["image-compressor", "image-converter"],
+    schemaType: "WebApplication",
+    keywords: [
+      "background remover",
+      "remove bg",
+      "transparent background",
+      "erase background",
+      "ai background removal free",
+    ],
+  },
+
+  {
+    slug: "ats-resume-checker",
+    name: "AI ATS Resume Scanner & Optimizer",
+    description:
+      "Diagnostic-test your resume against applicant tracking systems (ATS). Match job description keywords, calculate ATS score, and rewrite bullets in STAR format.",
+    shortDescription: "Scan resume against ATS filters & job keywords",
+    category: "ai",
+    icon: "FileCheck",
+    features: [
+      "Real-time ATS pass likelihood score (0–100%)",
+      "Matched vs. missing job description keyword audit",
+      "STAR-method resume bullet point rewriter",
+      "Recruiter formatting & parseability diagnostic checks",
+      "Actionable recommendations to boost interview conversion",
+    ],
+    inputType: "text",
+    processingLocation: "hybrid",
+    isNew: true,
+    relatedTools: ["word-counter", "background-remover"],
+    schemaType: "WebApplication",
+    keywords: [
+      "ats resume checker",
+      "ats resume scanner",
+      "ats score online",
+      "resume keyword matcher",
+      "resume optimizer free",
+    ],
+  },
+
+  {
+    slug: "ats-resume-builder",
+    name: "Harvard ATS Resume Builder",
+    description:
+      "Build free ATS-proof resumes using the single-column Ivy League format. Real-time ATS scoring, optional declaration toggle for PSU/Govt drives, and 1-click Instant Job Radar matching.",
+    shortDescription:
+      "Free Ivy League ATS resume builder with instant Job Radar",
+    category: "ai",
+    icon: "FileText",
+    features: [
+      "Harvard / Ivy League single-column ATS-compliant format",
+      "Real-time live ATS pass audit & actionable diagnostic checklist",
+      "Optional declaration toggle for Indian PSU, Govt & campus drives",
+      "Instant Job Radar: 1-click job search on LinkedIn, Naukri, Indeed & Wellfound",
+      "100% free vector PDF export — zero watermark, no sign-up required",
+      "Clean monochrome typography optimized for ATS OCR scanners",
+    ],
+    inputType: "form",
+    processingLocation: "client",
+    isNew: true,
+    relatedTools: ["ats-resume-checker", "merge-pdf", "word-counter"],
+    schemaType: "WebApplication",
+    keywords: [
+      "ats resume builder",
+      "harvard resume format",
+      "free resume builder no watermark",
+      "ivy league resume template",
+      "ats friendly resume builder",
+      "resume builder with job matches",
     ],
   },
 
@@ -964,11 +1187,29 @@ export function getNewTools(): ToolConfig[] {
   return tools.filter((t) => t.isNew);
 }
 
+const POPULAR_TOOL_SLUGS = [
+  "image-compressor",
+  "merge-pdf",
+  "qr-generator",
+  "json-formatter",
+  "password-generator",
+  "emi-calculator",
+];
+
 /**
- * Get popular tools (first 6 by default).
+ * Get popular tools across categories for the homepage.
  */
 export function getPopularTools(count: number = 6): ToolConfig[] {
-  return tools.slice(0, count);
+  const popular = POPULAR_TOOL_SLUGS.map((slug) =>
+    tools.find((t) => t.slug === slug),
+  ).filter((t): t is ToolConfig => t !== undefined);
+
+  if (popular.length >= count) {
+    return popular.slice(0, count);
+  }
+
+  const remaining = tools.filter((t) => !POPULAR_TOOL_SLUGS.includes(t.slug));
+  return [...popular, ...remaining].slice(0, count);
 }
 
 /**

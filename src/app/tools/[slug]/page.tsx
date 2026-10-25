@@ -93,6 +93,52 @@ const ConverterWorkspace = dynamic(
     ),
   },
 );
+const SipWorkspace = dynamic(
+  () => import("@/features/sip-calculator").then((m) => m.SipWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const JwtWorkspace = dynamic(
+  () => import("@/features/jwt-decoder").then((m) => m.JwtWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const BackgroundRemoverWorkspace = dynamic(
+  () =>
+    import("@/features/ai-background-remover").then(
+      (m) => m.BackgroundRemoverWorkspace,
+    ),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const AtsWorkspace = dynamic(
+  () => import("@/features/ats-resume-checker").then((m) => m.AtsWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const ResumeBuilderWorkspace = dynamic(
+  () =>
+    import("@/features/ats-resume-builder").then(
+      (m) => m.ResumeBuilderWorkspace,
+    ),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
 
 // Import SEO Assets and FAQs directly
 import * as passwordFeature from "@/features/password-generator";
@@ -104,6 +150,11 @@ import * as ageFeature from "@/features/age-calculator";
 import * as emiFeature from "@/features/emi-calculator";
 import * as compressorFeature from "@/features/image-compressor";
 import * as converterFeature from "@/features/image-converter";
+import * as sipFeature from "@/features/sip-calculator";
+import * as jwtFeature from "@/features/jwt-decoder";
+import * as bgRemoverFeature from "@/features/ai-background-remover";
+import * as atsFeature from "@/features/ats-resume-checker";
+import * as resumeBuilderFeature from "@/features/ats-resume-builder";
 
 const PDFWorkspace = dynamic(
   () => import("@/features/pdf").then((m) => m.PDFWorkspace),
@@ -158,15 +209,88 @@ const featureMap: Record<
     seoContent: emiFeature.seoContent,
     faqs: emiFeature.faqs,
   },
+  "sip-calculator": {
+    workspace: SipWorkspace,
+    seoContent: sipFeature.seoContent,
+    faqs: sipFeature.faqs,
+  },
   "image-compressor": {
-    workspace: CompressorWorkspace,
+    workspace: () => <CompressorWorkspace />,
     seoContent: compressorFeature.seoContent,
     faqs: compressorFeature.faqs,
+  },
+  "compress-image-to-20kb": {
+    workspace: () => <CompressorWorkspace defaultTargetKB={20} />,
+    seoContent: `
+## Compress Image to 20KB Online
+Need to reduce your photo or signature file size to under 20KB for government exam forms (SSC, UPSC, IBPS, State PSC)? ZORIQ Compress to 20KB optimizes image dimensions and JPEG encoding directly in your browser without uploading your sensitive ID photos to any third-party server.
+
+## Ideal For
+* **Online Exam Application Portals:** SSC CGL, CHSL, UPSC Civil Services, Banking (IBPS, SBI), Railway (RRB).
+* **Signatures & Thumb Impressions:** Most government application portals strictly mandate signature files between 10KB and 20KB.
+* **100% Client-Side Privacy:** Your biometric photos and signatures never leave your device.
+    `,
+    faqs: [
+      {
+        question: "How do I compress an image to under 20KB?",
+        answer:
+          "Upload your image or signature photo. ZORIQ automatically tunes resolution and compression algorithms to keep the file strictly under 20KB. Click Download to save.",
+      },
+      {
+        question: "Will my photo quality be ruined?",
+        answer:
+          "No. The compressor uses smart edge-preserving downsampling to ensure your photo remains clear, legible, and compliant with official specifications.",
+      },
+    ],
+  },
+  "compress-image-to-50kb": {
+    workspace: () => <CompressorWorkspace defaultTargetKB={50} />,
+    seoContent: `
+## Compress Image to 50KB Online
+Easily reduce passport-size photos, admit card pictures, and ID proofs to under 50KB. Perfect for college admission portals, employment registration, and visa applications.
+
+## Key Advantages
+* **Strict 50KB Upper Limit:** Guaranteed to pass strict file size upload filters on web forms.
+* **Preserves Facial Recognition Clarity:** Maintains facial sharpness, colors, and correct passport aspect ratios.
+* **Instant In-Browser Compression:** No waiting for cloud queues or server uploads.
+    `,
+    faqs: [
+      {
+        question: "Why do government portals require photos under 50KB?",
+        answer:
+          "Portals receive millions of applicant submissions. Restricting photo sizes to under 50KB saves server bandwidth and database storage while keeping web form submissions fast.",
+      },
+      {
+        question: "Can I compress photos directly from my phone?",
+        answer:
+          "Yes! ZORIQ works in mobile browsers on Android and iPhone. Take a photo and compress it instantly.",
+      },
+    ],
   },
   "image-converter": {
     workspace: ConverterWorkspace,
     seoContent: converterFeature.seoContent,
     faqs: converterFeature.faqs,
+  },
+  "jwt-decoder": {
+    workspace: JwtWorkspace,
+    seoContent: jwtFeature.seoContent,
+    faqs: jwtFeature.faqs,
+  },
+  "background-remover": {
+    workspace: BackgroundRemoverWorkspace,
+    seoContent: bgRemoverFeature.seoContent,
+    faqs: bgRemoverFeature.faqs,
+  },
+  "ats-resume-checker": {
+    workspace: AtsWorkspace,
+    seoContent: atsFeature.seoContent,
+    faqs: atsFeature.faqs,
+  },
+  "ats-resume-builder": {
+    workspace: ResumeBuilderWorkspace,
+    seoContent: resumeBuilderFeature.seoContent,
+    faqs: resumeBuilderFeature.faqs,
   },
 };
 
@@ -218,12 +342,24 @@ ${tool.features.map((f) => `* **${f.split(" — ")[0] || f}**: ${f.split(" — "
 3. **Execute Compiler**: Click run to trigger processing.
 4. **Immediate Saving**: Click download to save the processed file.
     `;
-    feature.faqs = tool.features
-      .map((f) => ({
-        question: `Does ZORIQ ${tool.name} support ${f.split(" — ")[0].toLowerCase()}?`,
-        answer: `Yes, ZORIQ ${tool.name} has complete, integrated support for ${f.toLowerCase()} directly inside your web browser.`,
-      }))
-      .slice(0, 3);
+    feature.faqs = [
+      {
+        question: `Is ${tool.name} completely free and private?`,
+        answer: `Yes, ZORIQ ${tool.name} is 100% free with no sign-ups or subscription fees. All file processing occurs client-side in your web browser, meaning your sensitive files never touch external servers or cloud storage.`,
+      },
+      {
+        question: `Is there a file size or document limit?`,
+        answer: `You can process files up to 25MB locally in your browser. Because computation leverages your local device resources, processing is instantaneous and has no daily usage limits.`,
+      },
+      {
+        question: `Can I use ${tool.name} on my mobile device?`,
+        answer: `Yes. ZORIQ is optimized for modern mobile browsers on Android and iOS, allowing you to manipulate and download PDFs without installing third-party apps.`,
+      },
+      {
+        question: `What should I do if my document fails to process?`,
+        answer: `Ensure your PDF is not corrupted or encrypted with restricted owner permissions. If your document requires a password, use our Unlock PDF tool first to decrypt it before applying further changes.`,
+      },
+    ];
   } else {
     const featureData = featureMap[slug];
     if (!featureData) {

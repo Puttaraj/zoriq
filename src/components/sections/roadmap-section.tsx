@@ -13,50 +13,50 @@ import {
 
 const roadmapItems = [
   {
-    phase: "Q3 2026",
-    title: "PDF Utilities",
+    phase: "Launched",
+    title: "PDF Utilities Suite",
     description:
-      "Compress, merge, split, and format PDF documents client-side in the browser.",
+      "Compress, merge, split, rotate, watermark, protect, and convert PDF documents 100% client-side in the browser.",
     icon: FileText,
-    status: "in-development",
+    status: "completed",
   },
   {
-    phase: "Q3 2026",
-    title: "AI Enhancements",
+    phase: "Launched",
+    title: "High-Compression Engines",
     description:
-      "Introduce smart features like regex pattern creators and layout code generation helpers.",
+      "Targeted photo compressors (20KB, 50KB, 100KB) and smart edge-preserving downsampling for government portal forms.",
     icon: Sparkles,
+    status: "completed",
+  },
+  {
+    phase: "Launched",
+    title: "Developer Utilities & Formatters",
+    description:
+      "JSON formatter, JWT decoder, UUID generator, password security generator, and code beautifiers.",
+    icon: Terminal,
+    status: "completed",
+  },
+  {
+    phase: "In Progress",
+    title: "Zero-Retention File Conversions",
+    description:
+      "Privacy-first sandboxed engines for Word, Excel, PowerPoint to PDF and Optical Character Recognition (OCR).",
+    icon: Image,
     status: "in-development",
   },
   {
-    phase: "Q4 2026",
-    title: "Advanced Image Tools",
+    phase: "Planned",
+    title: "Chrome Browser Extension",
     description:
-      "Remove image background objects, intelligent upscale, and smart smart overlays.",
-    icon: Image,
-    status: "planned",
-  },
-  {
-    phase: "Q4 2026",
-    title: "Developer APIs",
-    description:
-      "Programmatic micro-endpoints for direct JSON formatting, password creation, and validation.",
-    icon: Terminal,
-    status: "planned",
-  },
-  {
-    phase: "Q1 2027",
-    title: "Chrome Extension",
-    description:
-      "Run ZORIQ tools directly from any active browser tab with keyboard command support.",
+      "Run ZORIQ tools directly from any active browser tab with instant keyboard shortcuts.",
     icon: Chrome,
     status: "planned",
   },
   {
-    phase: "Q1 2027",
-    title: "Desktop & Mobile Apps",
+    phase: "Planned",
+    title: "Offline Desktop & Mobile PWA",
     description:
-      "Offline native application builds optimized for Windows, macOS, Android, and iOS.",
+      "Offline installable PWA application builds optimized for Windows, macOS, Android, and iOS.",
     icon: Monitor,
     status: "planned",
   },
@@ -94,7 +94,13 @@ export function RoadmapSection() {
               <div>
                 {/* Phase Badge & Icon */}
                 <div className="mb-4 flex items-center justify-between">
-                  <span className="text-primary bg-primary/5 border-primary/10 rounded-md border px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase">
+                  <span
+                    className={
+                      item.status === "completed"
+                        ? "rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold tracking-wider text-emerald-400 uppercase"
+                        : "text-primary bg-primary/5 border-primary/10 rounded-md border px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase"
+                    }
+                  >
                     {item.phase}
                   </span>
                   <div className="text-muted-foreground group-hover:text-primary transition-colors">
@@ -114,14 +120,18 @@ export function RoadmapSection() {
               <div className="mt-6 flex items-center justify-between text-[10px] font-bold tracking-wider uppercase">
                 <span
                   className={
-                    item.status === "in-development"
-                      ? "text-accent-surface"
-                      : "text-muted-foreground"
+                    item.status === "completed"
+                      ? "font-semibold text-emerald-400"
+                      : item.status === "in-development"
+                        ? "text-accent-surface font-semibold"
+                        : "text-muted-foreground"
                   }
                 >
-                  {item.status === "in-development"
-                    ? "• In Development"
-                    : "• Planned"}
+                  {item.status === "completed"
+                    ? "✓ Live in Production"
+                    : item.status === "in-development"
+                      ? "• In Development"
+                      : "• Planned"}
                 </span>
                 <ArrowUpRight className="text-foreground h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-60" />
               </div>

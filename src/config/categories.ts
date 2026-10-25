@@ -12,7 +12,7 @@ export const categories: CategoryConfig[] = [
       "Essential utilities for developers — JSON formatter, UUID generator, password generator, and more.",
     icon: "Code2",
     color: "from-violet-500 to-purple-600",
-    toolCount: 4,
+    toolCount: 5,
   },
   {
     slug: "image",
@@ -21,7 +21,7 @@ export const categories: CategoryConfig[] = [
       "Compress, convert, and optimize images directly in your browser. No upload required.",
     icon: "Image",
     color: "from-pink-500 to-rose-600",
-    toolCount: 2,
+    toolCount: 4,
   },
   {
     slug: "student",
@@ -39,7 +39,7 @@ export const categories: CategoryConfig[] = [
       "EMI calculator, SIP calculator, and financial planning tools for smart decisions.",
     icon: "IndianRupee",
     color: "from-emerald-500 to-green-600",
-    toolCount: 1,
+    toolCount: 2,
   },
   {
     slug: "pdf",
@@ -54,10 +54,10 @@ export const categories: CategoryConfig[] = [
     slug: "ai",
     name: "AI Tools",
     description:
-      "AI-powered utilities — image enhancement, text generation, and more. Coming soon.",
+      "Fast client-side AI utilities — background removal, image intelligence, and more.",
     icon: "Sparkles",
     color: "from-fuchsia-500 to-purple-600",
-    toolCount: 0,
+    toolCount: 3,
   },
   {
     slug: "utilities",

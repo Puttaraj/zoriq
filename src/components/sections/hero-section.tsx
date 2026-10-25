@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Shield, Zap, Globe, Clock } from "lucide-react";
 import Link from "next/link";
@@ -11,46 +10,16 @@ interface CounterProps {
   duration?: number;
 }
 
-function AnimatedCounter({ value, duration = 1000 }: CounterProps) {
-  const [count, setCount] = useState(0);
-  const numeric = parseInt(value.replace(/[^0-9]/g, ""), 10);
-  const suffix = value.replace(/[0-9]/g, "");
-
-  useEffect(() => {
-    if (isNaN(numeric)) return;
-
-    let start = 0;
-    const end = numeric;
-    const incrementTime = Math.max(Math.floor(duration / (end || 1)), 15);
-    const step = Math.max(Math.ceil(end / 50), 1);
-
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= end) {
-        setCount(end);
-        clearInterval(timer);
-      } else {
-        setCount(start);
-      }
-    }, incrementTime);
-
-    return () => clearInterval(timer);
-  }, [numeric, duration]);
-
-  if (isNaN(numeric)) return <span>{value}</span>;
-  return (
-    <span>
-      {count}
-      {suffix}
-    </span>
-  );
+function AnimatedCounter({ value }: CounterProps) {
+  // Render exact verifiable values directly to prevent hydration mismatch or temporary 0+ flash
+  return <span>{value}</span>;
 }
 
 const stats = [
-  { icon: Zap, label: "Free Tools", value: "10+" },
+  { icon: Zap, label: "Free Tools", value: "30+" },
   { icon: Shield, label: "Browser Processing", value: "100%" },
-  { icon: Globe, label: "Sign Up Required", value: "0" },
-  { icon: Clock, label: "Available", value: "24/7" },
+  { icon: Globe, label: "Account Required", value: "None" },
+  { icon: Clock, label: "Availability", value: "24/7" },
 ];
 
 export function HeroSection() {

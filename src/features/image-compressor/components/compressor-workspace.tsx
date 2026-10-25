@@ -10,13 +10,22 @@ import {
   Trash2,
 } from "lucide-react";
 import { FileDropzone } from "@/components/shared/file-dropzone";
-import { formatBytes, percentReduction } from "@/lib/utils";
+import { cn, formatBytes, percentReduction } from "@/lib/utils";
 
-export function CompressorWorkspace() {
+interface CompressorWorkspaceProps {
+  defaultTargetKB?: number;
+}
+
+export function CompressorWorkspace({
+  defaultTargetKB,
+}: CompressorWorkspaceProps = {}) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [compressedBlob, setCompressedBlob] = useState<Blob | null>(null);
   const [compressedSize, setCompressedSize] = useState<number | null>(null);
   const [quality, setQuality] = useState(80); // 80% default
+  const [targetKB, setTargetKB] = useState<number | null>(
+    defaultTargetKB ?? null,
+  ); // null = manual quality slider
   const [processing, setProcessing] = useState(false);
   const [originalPreview, setOriginalPreview] = useState<string>("");
   const [compressedPreview, setCompressedPreview] = useState<string>("");
@@ -32,7 +41,7 @@ export function CompressorWorkspace() {
     }
   }, []);
 
-  // Trigger compression when selected file or quality changes
+  // Trigger compression when selected file, quality, or targetKB changes
   useEffect(() => {
     if (!selectedFile) return;
 
@@ -42,10 +51,10 @@ export function CompressorWorkspace() {
     const runCompression = async () => {
       try {
         const options = {
-          maxSizeMB: 5,
-          maxWidthOrHeight: 2048,
+          maxSizeMB: targetKB ? targetKB / 1024 : 5,
+          maxWidthOrHeight: targetKB && targetKB <= 50 ? 1280 : 2048,
           useWebWorker: true,
-          initialQuality: quality / 100,
+          initialQuality: targetKB ? 0.9 : quality / 100,
         };
 
         const compressedFile = await imageCompression(selectedFile, options);
@@ -72,7 +81,7 @@ export function CompressorWorkspace() {
     return () => {
       active = false;
     };
-  }, [selectedFile, quality]);
+  }, [selectedFile, quality, targetKB]);
 
   const handleReset = () => {
     setSelectedFile(null);
@@ -134,7 +143,45 @@ export function CompressorWorkspace() {
               </button>
             </div>
 
-            {/* Quality Slider */}
+            {/* Compression Mode / Presets */}
+            <div className="flex flex-col gap-2">
+              <span className="text-foreground flex items-center justify-between text-xs font-semibold">
+                <span>Target File Size</span>
+                {targetKB ? (
+                  <span className="text-primary font-mono text-[11px]">
+                    Goal: &le; {targetKB} KB
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground text-[11px]">
+                    Manual Mode
+                  </span>
+                )}
+              </span>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[
+                  { label: "Slider", kb: null },
+                  { label: "20 KB", kb: 20 },
+                  { label: "50 KB", kb: 50 },
+                  { label: "100 KB", kb: 100 },
+                ].map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => setTargetKB(preset.kb)}
+                    className={cn(
+                      "focus-ring rounded-lg border px-2 py-1.5 text-center text-xs font-semibold transition-all",
+                      targetKB === preset.kb
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                        : "border-border/60 bg-muted/30 text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quality Slider (visible in manual mode) */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-sm font-semibold">
                 <span className="text-foreground flex items-center gap-1.5">
@@ -148,11 +195,20 @@ export function CompressorWorkspace() {
                 min="10"
                 max="100"
                 value={quality}
-                onChange={(e) => setQuality(Number(e.target.value))}
+                onChange={(e) => {
+                  setTargetKB(null);
+                  setQuality(Number(e.target.value));
+                }}
                 className="bg-muted accent-primary h-2 w-full cursor-pointer appearance-none rounded-full focus:outline-none"
                 aria-label="Compression quality"
                 disabled={processing}
               />
+              {targetKB && (
+                <p className="text-muted-foreground text-[11px]">
+                  * Auto-adjusting resolution &amp; compression to stay under{" "}
+                  <strong>{targetKB} KB</strong> for portal forms.
+                </p>
+              )}
             </div>
 
             {/* Performance/Comparison Metrics */}

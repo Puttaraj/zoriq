@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Heart, Github, Twitter, MessageSquare } from "lucide-react";
+import { Heart, Github, Twitter } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { Logo } from "@/components/shared/logo";
 
@@ -180,33 +180,28 @@ export function Footer() {
 
           <div className="flex items-center gap-4">
             {/* Social Icons */}
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors"
-              aria-label="GitHub"
-            >
-              <Github className="h-4 w-4" />
-            </a>
-            <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors"
-              aria-label="Twitter"
-            >
-              <Twitter className="h-4 w-4" />
-            </a>
-            <a
-              href="https://discord.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors"
-              aria-label="Discord"
-            >
-              <MessageSquare className="h-4 w-4" />
-            </a>
+            {siteConfig.links.github && (
+              <a
+                href={siteConfig.links.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground transition-colors"
+                aria-label="GitHub"
+              >
+                <Github className="h-4 w-4" />
+              </a>
+            )}
+            {siteConfig.links.twitter && (
+              <a
+                href={siteConfig.links.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground transition-colors"
+                aria-label="Twitter"
+              >
+                <Twitter className="h-4 w-4" />
+              </a>
+            )}
 
             <span className="bg-border/40 h-4 w-px" />
 

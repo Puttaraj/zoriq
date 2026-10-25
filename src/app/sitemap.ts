@@ -44,8 +44,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Dynamic tool workspace pages - automatically pulls from tool registry configurations
-  const toolPages: MetadataRoute.Sitemap = tools.map((tool) => ({
+  // Exclude unreleased Phase 2 converter stubs to prevent thin content / dead-end crawl penalties
+  const phase2Slugs = new Set([
+    "word-to-pdf",
+    "excel-to-pdf",
+    "powerpoint-to-pdf",
+    "html-to-pdf",
+    "pdf-to-word",
+    "pdf-to-excel",
+    "pdf-to-powerpoint",
+    "pdf-to-pdfa",
+    "ocr-pdf",
+    "repair-pdf",
+  ]);
+
+  const activeTools = tools.filter((tool) => !phase2Slugs.has(tool.slug));
+
+  // Dynamic tool workspace pages - only includes 100% active, functional tools
+  const toolPages: MetadataRoute.Sitemap = activeTools.map((tool) => ({
     url: `${baseUrl}/tools/${tool.slug}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,

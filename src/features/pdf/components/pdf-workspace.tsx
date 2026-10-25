@@ -13,7 +13,10 @@ import {
   Image as ImageIcon,
   ChevronUp,
   ChevronDown,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 import { FileDropzone } from "@/components/shared/file-dropzone";
 import { PDFPageSelector } from "./pdf-page-selector";
 import { SignaturePadModal } from "./signature-pad-modal";
@@ -337,6 +340,90 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
     "ocr-pdf",
     "repair-pdf",
   ].includes(slug);
+
+  if (isPhase2) {
+    return (
+      <div className="border-border/60 bg-card shadow-soft mx-auto max-w-4xl rounded-2xl border p-8 text-center sm:p-12">
+        <div className="border-primary/20 bg-primary/10 text-primary mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border">
+          <Sparkles className="h-8 w-8" />
+        </div>
+        <span className="border-primary/20 bg-primary/5 text-primary inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold tracking-wider uppercase">
+          Zero-Retention Cloud Sandbox · Under Active Testing
+        </span>
+        <h2 className="font-heading text-foreground mt-4 text-2xl font-bold tracking-tight sm:text-3xl">
+          Engine Optimization in Progress
+        </h2>
+        <p className="text-muted-foreground mx-auto mt-3 max-w-xl text-sm leading-relaxed">
+          To uphold ZORIQ&apos;s strict privacy standard, high-fidelity office
+          format conversion requires an isolated zero-log sandbox engine. We are
+          currently performing privacy and security audits to ensure no user
+          files are ever stored on a disk or shared.
+        </p>
+
+        <div className="border-border/40 bg-muted/5 mt-8 rounded-xl border p-6 text-left">
+          <h3 className="font-heading text-foreground mb-3 text-sm font-bold">
+            Available 100% In-Browser PDF Tools:
+          </h3>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+            <Link
+              href="/tools/merge-pdf"
+              className="border-border/60 bg-card hover:border-primary/40 group flex items-center justify-between rounded-lg border p-3 transition-all"
+            >
+              <span className="text-foreground group-hover:text-primary text-xs font-semibold">
+                Merge PDF
+              </span>
+              <ArrowRight className="text-muted-foreground group-hover:text-primary h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/tools/compress-pdf"
+              className="border-border/60 bg-card hover:border-primary/40 group flex items-center justify-between rounded-lg border p-3 transition-all"
+            >
+              <span className="text-foreground group-hover:text-primary text-xs font-semibold">
+                Compress PDF
+              </span>
+              <ArrowRight className="text-muted-foreground group-hover:text-primary h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/tools/split-pdf"
+              className="border-border/60 bg-card hover:border-primary/40 group flex items-center justify-between rounded-lg border p-3 transition-all"
+            >
+              <span className="text-foreground group-hover:text-primary text-xs font-semibold">
+                Split PDF
+              </span>
+              <ArrowRight className="text-muted-foreground group-hover:text-primary h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/tools/jpg-to-pdf"
+              className="border-border/60 bg-card hover:border-primary/40 group flex items-center justify-between rounded-lg border p-3 transition-all"
+            >
+              <span className="text-foreground group-hover:text-primary text-xs font-semibold">
+                JPG to PDF
+              </span>
+              <ArrowRight className="text-muted-foreground group-hover:text-primary h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/tools/pdf-to-jpg"
+              className="border-border/60 bg-card hover:border-primary/40 group flex items-center justify-between rounded-lg border p-3 transition-all"
+            >
+              <span className="text-foreground group-hover:text-primary text-xs font-semibold">
+                PDF to JPG
+              </span>
+              <ArrowRight className="text-muted-foreground group-hover:text-primary h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/tools/protect-pdf"
+              className="border-border/60 bg-card hover:border-primary/40 group flex items-center justify-between rounded-lg border p-3 transition-all"
+            >
+              <span className="text-foreground group-hover:text-primary text-xs font-semibold">
+                Protect PDF
+              </span>
+              <ArrowRight className="text-muted-foreground group-hover:text-primary h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border-border/60 bg-card shadow-soft mx-auto max-w-4xl rounded-2xl border p-6 sm:p-8">
