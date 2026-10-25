@@ -9,6 +9,7 @@ import {
   generateOrganizationSchema,
   generateWebsiteSchema,
   generateFAQSchema,
+  generateSiteNavigationSchema,
 } from "@/lib/seo";
 
 const homeFAQs = [
@@ -57,6 +58,12 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(generateFAQSchema(homeFAQs)),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(generateSiteNavigationSchema()),
         }}
       />
 

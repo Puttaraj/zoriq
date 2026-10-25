@@ -474,3 +474,55 @@ export function generateWebsiteSchema(): SchemaOrg {
     },
   };
 }
+
+/**
+ * Generate SiteNavigationElement Schema to encourage Google to render rich multi-link Sitelinks.
+ */
+export function generateSiteNavigationSchema(): SchemaOrg[] {
+  const topNavigation = [
+    {
+      name: "Image Compressor",
+      url: `${siteConfig.url}/tools/image-compressor`,
+      description:
+        "Compress JPEG, PNG, and WebP images online without losing quality",
+    },
+    {
+      name: "JSON Formatter & Validator",
+      url: `${siteConfig.url}/tools/json-formatter`,
+      description:
+        "Format, validate, and compare JSON data with live tree view",
+    },
+    {
+      name: "Merge PDF",
+      url: `${siteConfig.url}/tools/merge-pdf`,
+      description:
+        "Combine multiple PDF documents into a single file with visual reordering",
+    },
+    {
+      name: "QR Code Generator",
+      url: `${siteConfig.url}/tools/qr-generator`,
+      description:
+        "Generate custom QR codes for URLs, WiFi, and contacts in PNG and SVG",
+    },
+    {
+      name: "Developer Tools",
+      url: `${siteConfig.url}/tools?category=developer`,
+      description:
+        "JWT decoder, UUID generator, cURL converter, and regex tester",
+    },
+    {
+      name: "Contact & Feedback",
+      url: `${siteConfig.url}/contact`,
+      description:
+        "Send feedback, report bugs, or get support from the ZORIQ team",
+    },
+  ];
+
+  return topNavigation.map((item) => ({
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    name: item.name,
+    url: item.url,
+    description: item.description,
+  }));
+}

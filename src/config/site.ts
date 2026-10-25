@@ -53,9 +53,10 @@ export const siteConfig = {
   /** Default SEO values */
   seo: {
     titleTemplate: "%s | ZORIQ — Free Online Tools",
-    defaultTitle: "ZORIQ — Free Online Tools for Everyone",
+    defaultTitle:
+      "ZORIQ — Free Privacy-First Online Tools & Developer Utilities",
     defaultDescription:
-      "Free online tools for everyone — compress images, generate QR codes, format JSON, calculate EMI, and 100+ more utilities.",
+      "Handcrafted, 100% private browser tools. Compress images to 20KB/50KB, format JSON, merge & sign PDFs, decode JWTs, test regex, convert cURL, and calculate EMIs with zero server uploads.",
   },
 } as const;
 
