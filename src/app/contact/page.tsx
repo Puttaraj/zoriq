@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { generatePageMetadata } from "@/lib/seo";
 import { Mail, Clock, ShieldAlert } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { ContactForm } from "@/components/forms/contact-form";
 
 export const metadata: Metadata = generatePageMetadata(
   "Contact Us — ZORIQ",
@@ -76,61 +77,8 @@ export default function ContactPage() {
           </div>
 
           {/* Form Column */}
-          <div className="border-border/60 bg-card shadow-soft rounded-2xl border p-6 sm:p-8 md:col-span-7">
-            <form className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-muted-foreground text-xs font-semibold">
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="John Doe"
-                    className="border-border bg-background focus:border-primary w-full rounded-lg border px-3 py-2 text-sm outline-none"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-muted-foreground text-xs font-semibold">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="john@example.com"
-                    className="border-border bg-background focus:border-primary w-full rounded-lg border px-3 py-2 text-sm outline-none"
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-muted-foreground text-xs font-semibold">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Feature request / General feedback"
-                  className="border-border bg-background focus:border-primary w-full rounded-lg border px-3 py-2 text-sm outline-none"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-muted-foreground text-xs font-semibold">
-                  Message
-                </label>
-                <textarea
-                  required
-                  placeholder="What is on your mind?"
-                  rows={4}
-                  className="border-border bg-background focus:border-primary w-full resize-none rounded-lg border px-3 py-2 text-sm outline-none"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 focus-ring mt-2 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold shadow-sm transition-all"
-              >
-                Send Message
-              </button>
-            </form>
+          <div className="md:col-span-7">
+            <ContactForm />
           </div>
         </div>
       </div>

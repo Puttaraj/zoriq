@@ -162,6 +162,127 @@ const TOOL_SEO_OVERRIDES: Record<
       "count words in text",
     ],
   },
+  "base64-converter": {
+    title: "Base64 Encoder & Decoder Online — Images, Files & Text — ZORIQ",
+    description:
+      "Convert images, files, and text to Base64 data URIs or decode Base64 strings back to original files. 100% private in-browser tool with zero server uploads.",
+    keywords: [
+      "base64 encoder",
+      "base64 decoder",
+      "image to base64",
+      "base64 to image",
+      "data uri generator",
+      "base64 online converter",
+    ],
+  },
+  "cron-generator": {
+    title: "Cron Expression Generator & Explainer — Crontab Guru — ZORIQ",
+    description:
+      "Generate, validate, and convert cron expressions into human-readable English schedules. Features visual builders, upcoming timestamps, and one-click presets.",
+    keywords: [
+      "cron generator",
+      "cron expression generator",
+      "crontab guru",
+      "cron syntax explainer",
+      "crontab generator online",
+    ],
+  },
+  "regex-tester": {
+    title: "Regex Tester & Visualizer Online — Real-Time Matcher — ZORIQ",
+    description:
+      "Test and debug regular expressions online with real-time match highlighting, capture group inspectors, regex cheat sheets, and common patterns.",
+    keywords: [
+      "regex tester",
+      "regex online tester",
+      "regular expression tester",
+      "regex visualizer",
+      "test regex javascript",
+    ],
+  },
+  "curl-converter": {
+    title: "cURL to Code Converter — Fetch, Python, Axios & Go — ZORIQ",
+    description:
+      "Convert cURL commands instantly into JavaScript Fetch, Axios, Python Requests, Node.js, and Go net/http code. 100% client-side privacy for API tokens.",
+    keywords: [
+      "curl converter",
+      "curl to fetch",
+      "curl to python",
+      "curl to axios",
+      "curl command converter online",
+    ],
+  },
+  "svg-to-png": {
+    title: "SVG to PNG & WebP Converter Online (High-DPI Up to 8x) — ZORIQ",
+    description:
+      "Convert SVG vector graphics to crisp PNG, WebP, and JPEG raster images. Supports transparent backgrounds and ultra-HD scale factors up to 8x.",
+    keywords: [
+      "svg to png",
+      "convert svg to png online",
+      "svg to webp",
+      "high resolution svg to png",
+      "vector to png",
+    ],
+  },
+  "remove-exif": {
+    title: "Remove EXIF Data Online — Strip GPS & Photo Metadata — ZORIQ",
+    description:
+      "Purge GPS location coordinates, camera models, and private metadata from photos before posting online. 100% client-side zero-retention privacy.",
+    keywords: [
+      "remove exif",
+      "strip exif data online",
+      "remove gps from photo",
+      "photo privacy cleaner",
+      "delete metadata from image",
+    ],
+  },
+  "screenshot-mockup": {
+    title: "Screenshot Mockup Generator — macOS Window Frames — ZORIQ",
+    description:
+      "Turn screenshots and code captures into stunning showcase mockups with macOS window headers, vibrant gradients, shadows, and 2x Retina download.",
+    keywords: [
+      "screenshot mockup",
+      "screenshot frame generator",
+      "macos window mockup",
+      "code screenshot mockup",
+      "beautiful screenshot maker",
+    ],
+  },
+  "markdown-to-html": {
+    title: "Markdown to HTML Converter Online — Real-Time Preview — ZORIQ",
+    description:
+      "Convert GitHub Flavored Markdown to clean HTML with synchronized live preview, instant syntax highlighting, and downloadable styled HTML files.",
+    keywords: [
+      "markdown to html",
+      "convert markdown to html online",
+      "markdown previewer",
+      "markdown editor online",
+      "github flavored markdown",
+    ],
+  },
+  "diff-checker": {
+    title: "Diff Checker & Text Compare Online — Side-by-Side — ZORIQ",
+    description:
+      "Compare two text files or code snippets online. Visual side-by-side and unified diff views with highlighted additions, deletions, and line statistics.",
+    keywords: [
+      "diff checker",
+      "text compare online",
+      "code diff online",
+      "side by side text comparison",
+      "diff tool online",
+    ],
+  },
+  "timezone-converter": {
+    title: "Timezone Converter & Epoch Timestamp Converter — ZORIQ",
+    description:
+      "Convert times across global timezones (UTC, IST, EST, PST, GMT, JST) and convert Unix timestamps to human dates. Perfect meeting planner and developer clock.",
+    keywords: [
+      "timezone converter",
+      "epoch converter",
+      "unix timestamp to date",
+      "world clock meeting planner",
+      "utc to ist converter",
+    ],
+  },
 };
 
 /**

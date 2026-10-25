@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { CommandPalette } from "@/components/shared/command-palette";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import "./globals.css";
@@ -137,6 +138,7 @@ export default function RootLayout({
               />
             </div>
             <Header />
+            <CommandPalette />
             <main className="flex-1">{children}</main>
             <Footer />
           </div>

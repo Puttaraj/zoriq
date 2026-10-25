@@ -140,6 +140,88 @@ const ResumeBuilderWorkspace = dynamic(
   },
 );
 
+const Base64Workspace = dynamic(
+  () => import("@/features/base64-converter").then((m) => m.Base64Workspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const CronWorkspace = dynamic(
+  () => import("@/features/cron-generator").then((m) => m.CronWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const RegexWorkspace = dynamic(
+  () => import("@/features/regex-tester").then((m) => m.RegexWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const CurlWorkspace = dynamic(
+  () => import("@/features/curl-converter").then((m) => m.CurlWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const SvgWorkspace = dynamic(
+  () => import("@/features/svg-to-png").then((m) => m.SvgWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const ExifWorkspace = dynamic(
+  () => import("@/features/remove-exif").then((m) => m.ExifWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const MockupWorkspace = dynamic(
+  () => import("@/features/screenshot-mockup").then((m) => m.MockupWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const MarkdownWorkspace = dynamic(
+  () => import("@/features/markdown-to-html").then((m) => m.MarkdownWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const DiffWorkspace = dynamic(
+  () => import("@/features/diff-checker").then((m) => m.DiffWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+const TimezoneWorkspace = dynamic(
+  () =>
+    import("@/features/timezone-converter").then((m) => m.TimezoneWorkspace),
+  {
+    loading: () => (
+      <div className="bg-muted/10 h-96 animate-pulse rounded-2xl border" />
+    ),
+  },
+);
+
 // Import SEO Assets and FAQs directly
 import * as passwordFeature from "@/features/password-generator";
 import * as uuidFeature from "@/features/uuid-generator";
@@ -155,6 +237,16 @@ import * as jwtFeature from "@/features/jwt-decoder";
 import * as bgRemoverFeature from "@/features/ai-background-remover";
 import * as atsFeature from "@/features/ats-resume-checker";
 import * as resumeBuilderFeature from "@/features/ats-resume-builder";
+import * as base64Feature from "@/features/base64-converter";
+import * as cronFeature from "@/features/cron-generator";
+import * as regexFeature from "@/features/regex-tester";
+import * as curlFeature from "@/features/curl-converter";
+import * as svgFeature from "@/features/svg-to-png";
+import * as exifFeature from "@/features/remove-exif";
+import * as mockupFeature from "@/features/screenshot-mockup";
+import * as markdownFeature from "@/features/markdown-to-html";
+import * as diffFeature from "@/features/diff-checker";
+import * as timezoneFeature from "@/features/timezone-converter";
 
 const PDFWorkspace = dynamic(
   () => import("@/features/pdf").then((m) => m.PDFWorkspace),
@@ -292,11 +384,63 @@ Easily reduce passport-size photos, admit card pictures, and ID proofs to under 
     seoContent: resumeBuilderFeature.seoContent,
     faqs: resumeBuilderFeature.faqs,
   },
+  "base64-converter": {
+    workspace: Base64Workspace,
+    seoContent: base64Feature.seoContent,
+    faqs: base64Feature.faqs,
+  },
+  "cron-generator": {
+    workspace: CronWorkspace,
+    seoContent: cronFeature.seoContent,
+    faqs: cronFeature.faqs,
+  },
+  "regex-tester": {
+    workspace: RegexWorkspace,
+    seoContent: regexFeature.seoContent,
+    faqs: regexFeature.faqs,
+  },
+  "curl-converter": {
+    workspace: CurlWorkspace,
+    seoContent: curlFeature.seoContent,
+    faqs: curlFeature.faqs,
+  },
+  "svg-to-png": {
+    workspace: SvgWorkspace,
+    seoContent: svgFeature.seoContent,
+    faqs: svgFeature.faqs,
+  },
+  "remove-exif": {
+    workspace: ExifWorkspace,
+    seoContent: exifFeature.seoContent,
+    faqs: exifFeature.faqs,
+  },
+  "screenshot-mockup": {
+    workspace: MockupWorkspace,
+    seoContent: mockupFeature.seoContent,
+    faqs: mockupFeature.faqs,
+  },
+  "markdown-to-html": {
+    workspace: MarkdownWorkspace,
+    seoContent: markdownFeature.seoContent,
+    faqs: markdownFeature.faqs,
+  },
+  "diff-checker": {
+    workspace: DiffWorkspace,
+    seoContent: diffFeature.seoContent,
+    faqs: diffFeature.faqs,
+  },
+  "timezone-converter": {
+    workspace: TimezoneWorkspace,
+    seoContent: timezoneFeature.seoContent,
+    faqs: timezoneFeature.faqs,
+  },
 };
 
 interface ToolPageProps {
   params: Promise<{ slug: string }>;
 }
+
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   return tools.map((t) => ({ slug: t.slug }));
@@ -307,7 +451,9 @@ export async function generateMetadata({
 }: ToolPageProps): Promise<Metadata> {
   const { slug } = await params;
   const tool = getToolBySlug(slug);
-  if (!tool) return {};
+  if (!tool) {
+    notFound();
+  }
   return generateToolMetadata(tool);
 }
 

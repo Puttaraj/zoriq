@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, WifiOff } from "lucide-react";
+import { Menu, X, WifiOff, Search } from "lucide-react";
 import { mainNav } from "@/config/navigation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Logo } from "@/components/shared/logo";
@@ -75,12 +75,41 @@ export function Header() {
 
         {/* Right Side */}
         <div className="flex items-center gap-2">
+          {/* Quick Search Command Palette Trigger */}
+          <button
+            type="button"
+            onClick={() =>
+              window.dispatchEvent(new CustomEvent("open-command-palette"))
+            }
+            className="border-border/60 bg-muted/20 hover:border-primary/40 hover:bg-muted/50 text-muted-foreground hover:text-foreground hidden items-center gap-2 rounded-xl border px-3 py-1.5 text-xs transition-all md:inline-flex"
+            aria-label="Search tools (Press Cmd+K / Ctrl+K)"
+          >
+            <Search className="text-primary h-3.5 w-3.5" />
+            <span className="font-medium">Search tools...</span>
+            <kbd className="bg-background border-border/40 text-muted-foreground/80 rounded border px-1.5 py-0.5 font-mono text-[10px]">
+              ⌘K
+            </kbd>
+          </button>
+
           {!isOnline && (
             <span className="hidden items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold text-amber-500 sm:inline-flex">
               <WifiOff className="h-3.5 w-3.5" />
               Offline Mode
             </span>
           )}
+
+          {/* Mobile Search Button */}
+          <button
+            type="button"
+            onClick={() =>
+              window.dispatchEvent(new CustomEvent("open-command-palette"))
+            }
+            className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:hidden"
+            aria-label="Open search palette"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+
           <ThemeToggle />
 
           {/* Mobile Menu Button */}

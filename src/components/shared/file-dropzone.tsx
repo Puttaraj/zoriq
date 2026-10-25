@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, X, FileIcon, AlertCircle } from "lucide-react";
+import { Upload, X, FileIcon, AlertCircle, ClipboardCheck } from "lucide-react";
 import { cn, formatBytes, isValidFileType, isValidFileSize } from "@/lib/utils";
 
 interface FileDropzoneProps {
@@ -36,10 +36,11 @@ export function FileDropzone({
 }: FileDropzoneProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pastedFeedback, setPastedFeedback] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = useCallback(
-    (fileList: FileList | null) => {
+    (fileList: FileList | File[] | null) => {
       if (!fileList || fileList.length === 0) return;
       setError(null);
 
@@ -62,6 +63,58 @@ export function FileDropzone({
     },
     [accept, maxSize, maxFiles, onFilesAccepted],
   );
+
+  // Global Clipboard Paste Listener for instant one-step image/PDF uploads
+  useEffect(() => {
+    if (disabled) return;
+
+    const handlePaste = (e: ClipboardEvent) => {
+      // Ignore if user is currently typing inside an active input or textarea
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (!e.clipboardData) return;
+
+      const clipboardFiles: File[] = [];
+
+      // 1. Check direct files attached to clipboard
+      if (e.clipboardData.files && e.clipboardData.files.length > 0) {
+        for (let i = 0; i < e.clipboardData.files.length; i++) {
+          clipboardFiles.push(e.clipboardData.files[i]);
+        }
+      } else if (e.clipboardData.items && e.clipboardData.items.length > 0) {
+        // 2. Check items (screenshots, copied image bitmap blobs from web/system)
+        for (let i = 0; i < e.clipboardData.items.length; i++) {
+          const item = e.clipboardData.items[i];
+          if (item.kind === "file") {
+            const blobFile = item.getAsFile();
+            if (blobFile) {
+              clipboardFiles.push(blobFile);
+            }
+          }
+        }
+      }
+
+      if (clipboardFiles.length > 0) {
+        e.preventDefault();
+        handleFiles(clipboardFiles);
+        setPastedFeedback(true);
+        setTimeout(() => setPastedFeedback(false), 2500);
+      }
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+    };
+  }, [disabled, handleFiles]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -135,12 +188,16 @@ export function FileDropzone({
           <div
             className={cn(
               "flex h-14 w-14 items-center justify-center rounded-xl transition-colors",
-              isDragOver
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground",
+              pastedFeedback
+                ? "bg-emerald-500 text-white"
+                : isDragOver
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground",
             )}
           >
-            {isDragOver ? (
+            {pastedFeedback ? (
+              <ClipboardCheck className="h-7 w-7" />
+            ) : isDragOver ? (
               <FileIcon className="h-7 w-7" />
             ) : (
               <Upload className="h-7 w-7" />
@@ -150,12 +207,25 @@ export function FileDropzone({
 
         <div className="text-center">
           <p className="text-foreground text-sm font-medium">
-            {isDragOver ? "Drop files here" : label}
+            {pastedFeedback
+              ? "✓ Uploaded from clipboard!"
+              : isDragOver
+                ? "Drop files here"
+                : label}
           </p>
           <p className="text-muted-foreground mt-1 text-xs">
             {helperText ??
               `${formatNames} · Max ${formatBytes(maxSize)}${multiple ? ` · Up to ${maxFiles} files` : ""}`}
           </p>
+
+          {/* Clipboard Paste Hint badge */}
+          <div className="mt-2.5 flex items-center justify-center gap-1.5">
+            <span className="bg-muted/60 border-border/40 text-muted-foreground inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium transition-colors">
+              <kbd className="font-mono font-semibold">Ctrl + V</kbd> or{" "}
+              <kbd className="font-mono font-semibold">⌘V</kbd> to paste
+              screenshot / file
+            </span>
+          </div>
         </div>
       </div>
 

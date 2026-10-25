@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   KeyRound,
   ShieldCheck,
@@ -9,8 +9,16 @@ import {
   Copy,
   Check,
   Trash2,
+  Lock,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
 } from "lucide-react";
-import { parseJwt } from "../lib/jwt";
+import {
+  parseJwt,
+  formatDetailedCountdown,
+  verifyHmacSha256,
+} from "../lib/jwt";
 
 const SAMPLE_JWT =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
@@ -20,10 +28,34 @@ const SAMPLE_JWT =
 export function JwtWorkspace() {
   const [tokenInput, setTokenInput] = useState(SAMPLE_JWT);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
+  const [secretKey, setSecretKey] = useState("");
+  const [verifyStatus, setVerifyStatus] = useState<
+    "idle" | "valid" | "invalid"
+  >("idle");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  // Real-time 1-second interval ticker for live countdown
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const decoded = useMemo(() => {
     return parseJwt(tokenInput);
   }, [tokenInput]);
+
+  const liveCountdown = useMemo(() => {
+    if (!decoded || !decoded.expiresAt) {
+      return formatDetailedCountdown(null);
+    }
+    const diffSeconds = Math.floor(
+      (decoded.expiresAt.getTime() - currentTime) / 1000,
+    );
+    return formatDetailedCountdown(diffSeconds);
+  }, [decoded, currentTime]);
 
   const handleCopy = (text: string, section: string) => {
     navigator.clipboard.writeText(text);
@@ -31,15 +63,18 @@ export function JwtWorkspace() {
     setTimeout(() => setCopiedSection(null), 2000);
   };
 
-  const formatExpiryTime = (seconds: number | null) => {
-    if (seconds === null) return "No expiration set (never expires)";
-    if (seconds <= 0) return "Token has expired";
-    const days = Math.floor(seconds / (3600 * 24));
-    const hours = Math.floor((seconds % (3600 * 24)) / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    if (days > 0) return `Expires in ${days} days, ${hours} hours`;
-    if (hours > 0) return `Expires in ${hours} hours, ${mins} minutes`;
-    return `Expires in ${mins} minutes`;
+  const handleVerifySecret = async () => {
+    if (!tokenInput.trim() || !secretKey) {
+      setVerifyStatus("idle");
+      return;
+    }
+    setIsVerifying(true);
+    try {
+      const isValid = await verifyHmacSha256(tokenInput, secretKey);
+      setVerifyStatus(isValid ? "valid" : "invalid");
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   return (
@@ -49,20 +84,27 @@ export function JwtWorkspace() {
         <div className="flex items-center gap-2">
           <KeyRound className="text-primary h-5 w-5" />
           <span className="font-heading text-foreground text-sm font-bold">
-            100% Client-Side JWT Inspector
+            100% Client-Side JWT Inspector &amp; Verifier
           </span>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setTokenInput(SAMPLE_JWT)}
+            onClick={() => {
+              setTokenInput(SAMPLE_JWT);
+              setVerifyStatus("idle");
+            }}
             className="border-border bg-muted/40 hover:bg-muted text-foreground rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all"
           >
             Load Sample JWT
           </button>
           <button
             type="button"
-            onClick={() => setTokenInput("")}
+            onClick={() => {
+              setTokenInput("");
+              setSecretKey("");
+              setVerifyStatus("idle");
+            }}
             className="border-border hover:bg-destructive/10 hover:text-destructive text-muted-foreground inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -78,7 +120,10 @@ export function JwtWorkspace() {
         </label>
         <textarea
           value={tokenInput}
-          onChange={(e) => setTokenInput(e.target.value)}
+          onChange={(e) => {
+            setTokenInput(e.target.value);
+            setVerifyStatus("idle");
+          }}
           placeholder="Paste your encoded JWT token here (e.g. eyJhbGci...)"
           rows={4}
           className="border-border/80 bg-muted/10 focus-within:border-primary w-full rounded-xl border p-3 font-mono text-xs leading-relaxed break-all transition-all outline-none"
@@ -88,29 +133,40 @@ export function JwtWorkspace() {
       {/* Decoded Details */}
       {decoded ? (
         <div className="mt-8 flex flex-col gap-6">
-          {/* Expiration Alert Banner */}
+          {/* Live Expiration Countdown Banner */}
           <div
-            className={`flex items-center justify-between rounded-xl border p-4 text-xs font-semibold ${
-              decoded.isExpired
+            className={`flex flex-col justify-between gap-3 rounded-xl border p-4 text-xs font-semibold sm:flex-row sm:items-center ${
+              liveCountdown.severity === "expired"
                 ? "border-destructive/30 bg-destructive/10 text-destructive"
-                : "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                : liveCountdown.severity === "urgent"
+                  ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  : liveCountdown.severity === "valid"
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "border-border/40 bg-muted/30 text-muted-foreground"
             }`}
           >
             <div className="flex items-center gap-2">
-              {decoded.isExpired ? (
-                <ShieldAlert className="h-5 w-5" />
+              {liveCountdown.severity === "expired" ? (
+                <ShieldAlert className="h-5 w-5 flex-shrink-0" />
               ) : (
-                <ShieldCheck className="h-5 w-5" />
+                <ShieldCheck className="h-5 w-5 flex-shrink-0" />
               )}
               <span>
-                {decoded.isExpired
-                  ? "TOKEN EXPIRED: This JWT has passed its validity timestamp."
-                  : "TOKEN VALID: This JWT is currently active."}
+                {liveCountdown.severity === "expired"
+                  ? "TOKEN EXPIRED"
+                  : liveCountdown.severity === "urgent"
+                    ? "EXPIRING SOON"
+                    : liveCountdown.severity === "valid"
+                      ? "TOKEN ACTIVE & VALID"
+                      : "LIFETIME TOKEN"}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 font-mono">
+
+            <div className="flex items-center gap-2 font-mono">
               <Clock className="h-4 w-4" />
-              <span>{formatExpiryTime(decoded.secondsRemaining)}</span>
+              <span className="font-bold tracking-wide">
+                {liveCountdown.text}
+              </span>
             </div>
           </div>
 
@@ -181,19 +237,74 @@ export function JwtWorkspace() {
             </div>
           </div>
 
-          {/* Signature Box */}
-          <div className="border-border/60 bg-muted/5 rounded-xl border p-4">
-            <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-cyan-600 uppercase dark:text-cyan-400">
-              <span className="h-2.5 w-2.5 rounded-full bg-cyan-500" />
-              Signature Block
+          {/* Signature Verification Block with HMAC-SHA256 Input */}
+          <div className="border-border/60 bg-muted/5 rounded-xl border p-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-cyan-600 uppercase dark:text-cyan-400">
+                <span className="h-2.5 w-2.5 rounded-full bg-cyan-500" />
+                HMAC-SHA256 Signature Verification
+              </div>
+              <span className="text-muted-foreground flex items-center gap-1 text-[10px] font-normal">
+                <Lock className="h-3 w-3" />
+                100% In-Browser (Secret never transmitted)
+              </span>
             </div>
+
             <p className="text-muted-foreground mt-1 text-xs">
-              HMAC / RSA cryptographic signature string. Verified locally by
-              secret key:
+              Raw signature token string:
             </p>
-            <p className="border-border/40 bg-muted/20 text-foreground mt-2 rounded-lg border p-2.5 font-mono text-xs break-all">
+            <p className="border-border/40 bg-muted/20 text-foreground mt-1.5 rounded-lg border p-2.5 font-mono text-xs break-all">
               {decoded.signature}
             </p>
+
+            {/* Secret Verification Field */}
+            <div className="mt-4 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+              <input
+                type="text"
+                value={secretKey}
+                onChange={(e) => {
+                  setSecretKey(e.target.value);
+                  setVerifyStatus("idle");
+                }}
+                placeholder="Enter secret key to verify HMAC-SHA256 signature..."
+                className="border-border/80 bg-background focus:border-primary flex-1 rounded-lg border px-3 py-2 font-mono text-xs outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleVerifySecret}
+                disabled={!secretKey.trim() || isVerifying}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 focus-ring inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all disabled:opacity-50"
+              >
+                {isVerifying ? "Verifying..." : "Verify Signature"}
+              </button>
+            </div>
+
+            {/* Verification Status Feedback */}
+            {verifyStatus === "valid" && (
+              <div className="mt-3 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+                <span>
+                  ✓ Signature Verified: The provided secret matches the
+                  token&apos;s HMAC-SHA256 signature.
+                </span>
+              </div>
+            )}
+            {verifyStatus === "invalid" && (
+              <div className="border-destructive/30 bg-destructive/10 text-destructive mt-3 flex items-center gap-2 rounded-lg border p-3 text-xs font-semibold">
+                <XCircle className="h-4 w-4 flex-shrink-0" />
+                <span>
+                  ✗ Signature Mismatch: The provided secret does not match this
+                  token&apos;s cryptographic signature.
+                </span>
+              </div>
+            )}
+            {verifyStatus === "idle" && !secretKey && (
+              <p className="text-muted-foreground mt-2 flex items-center gap-1 text-[11px]">
+                <HelpCircle className="h-3.5 w-3.5" />
+                Provide your API secret key above to mathematically verify if
+                this token was signed by your server.
+              </p>
+            )}
           </div>
         </div>
       ) : tokenInput.trim() ? (

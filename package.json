@@ -6,7 +6,8 @@
   "author": "ZORIQ <hello@zoriq.co.in>",
   "homepage": "https://zoriq.co.in",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
+    "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -30,6 +31,7 @@
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "resend": "^6.34.1",
     "signature_pad": "^5.1.3",
     "tailwind-merge": "^3.0.0",
     "zod": "^3.24.0"

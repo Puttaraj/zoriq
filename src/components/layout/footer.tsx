@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Heart, Github, Twitter } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { Logo } from "@/components/shared/logo";
+import { NewsletterForm } from "@/components/forms/newsletter-form";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -26,21 +27,7 @@ export function Footer() {
               <h4 className="text-foreground text-[10px] font-bold tracking-wider uppercase">
                 Subscribe to our newsletter
               </h4>
-              <div className="border-border/40 bg-card focus-within:border-primary/50 relative flex items-center rounded-lg border p-1 transition-all duration-300">
-                <input
-                  type="email"
-                  placeholder="name@email.com"
-                  className="placeholder:text-muted-foreground/60 w-full flex-1 bg-transparent px-2.5 py-1.5 text-xs outline-none"
-                  aria-label="Newsletter email"
-                  suppressHydrationWarning={true}
-                />
-                <button
-                  type="button"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 focus-ring rounded px-3 py-1.5 text-[10px] font-semibold transition-all"
-                >
-                  Join
-                </button>
-              </div>
+              <NewsletterForm />
             </div>
           </div>
 

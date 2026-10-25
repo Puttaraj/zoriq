@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import {
   Loader2,
   Download,
@@ -13,6 +13,10 @@ import {
   Image as ImageIcon,
   ChevronUp,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  GripVertical,
+  Activity,
   Sparkles,
   ArrowRight,
 } from "lucide-react";
@@ -126,6 +130,24 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
   const reverseFilesOrder = () => {
     setFiles([...files].reverse());
   };
+
+  const removeFile = (index: number) => {
+    const updated = files.filter((_, i) => i !== index);
+    setFiles(updated);
+    if (updated.length === 0) {
+      handleReset();
+    }
+  };
+
+  const totalFileSize = useMemo(() => {
+    return files.reduce((acc, f) => acc + f.size, 0);
+  }, [files]);
+
+  const memoryLevel = useMemo(() => {
+    if (totalFileSize > 45 * 1024 * 1024 || files.length > 20) return "high";
+    if (totalFileSize > 20 * 1024 * 1024 || files.length > 10) return "medium";
+    return "optimal";
+  }, [totalFileSize, files.length]);
 
   const handleProcess = async () => {
     if (files.length === 0) return;
@@ -928,6 +950,58 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
               </div>
             </div>
 
+            {/* Mobile Browser Memory Monitor Indicator */}
+            {multipleFiles && files.length > 0 && (
+              <div
+                className={`flex flex-col gap-1.5 rounded-xl border p-3 text-xs ${
+                  memoryLevel === "high"
+                    ? "border-destructive/30 bg-destructive/10 text-destructive"
+                    : memoryLevel === "medium"
+                      ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      : "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                }`}
+              >
+                <div className="flex items-center justify-between font-bold">
+                  <span className="flex items-center gap-1.5">
+                    <Activity className="h-3.5 w-3.5" />
+                    Browser Memory Monitor
+                  </span>
+                  <span className="font-mono text-[11px]">
+                    {formatBytes(totalFileSize)} / {files.length}{" "}
+                    {files.length === 1 ? "file" : "files"}
+                  </span>
+                </div>
+                {/* Visual Memory Meter Bar */}
+                <div className="bg-muted/40 h-1.5 w-full overflow-hidden rounded-full">
+                  <div
+                    className={`h-full transition-all duration-300 ${
+                      memoryLevel === "high"
+                        ? "bg-destructive"
+                        : memoryLevel === "medium"
+                          ? "bg-amber-500"
+                          : "bg-emerald-500"
+                    }`}
+                    style={{
+                      width: `${Math.min(
+                        Math.max(
+                          (totalFileSize / (50 * 1024 * 1024)) * 100,
+                          10,
+                        ),
+                        100,
+                      )}%`,
+                    }}
+                  />
+                </div>
+                <p className="text-[10px] leading-relaxed opacity-90">
+                  {memoryLevel === "high"
+                    ? "⚠️ High memory load: Mobile Safari and Chrome tabs have strict RAM thresholds (~100MB). For crash-free performance, process in batches of 10–15 files."
+                    : memoryLevel === "medium"
+                      ? "ℹ️ Moderate memory load: Client-side compilation is running within safe memory limits."
+                      : "✓ Optimal memory: Lightweight payload ensuring instant, crash-free browser processing."}
+                </p>
+              </div>
+            )}
+
             {/* Run Button Action */}
             <button
               type="button"
@@ -1017,10 +1091,20 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
                 </div>
               ) : multipleFiles ? (
                 <div className="w-full">
-                  <p className="text-muted-foreground mb-3 text-[10px] leading-relaxed font-semibold">
-                    Visual files list order queue preview:
-                  </p>
-                  <PDFFilesPreview files={files} />
+                  <div className="mb-3 flex items-center justify-between">
+                    <p className="text-muted-foreground text-[10px] leading-relaxed font-semibold">
+                      Drag cards or use arrows to visually reorder before
+                      merging:
+                    </p>
+                    <span className="text-primary text-[10px] font-bold">
+                      {files.length} documents
+                    </span>
+                  </div>
+                  <PDFFilesPreview
+                    files={files}
+                    onReorderFiles={setFiles}
+                    onRemoveFile={removeFile}
+                  />
                 </div>
               ) : (
                 <div className="text-muted-foreground flex flex-col items-center justify-center gap-3 text-center">
@@ -1051,16 +1135,25 @@ export function PDFWorkspace({ slug }: PDFWorkspaceProps) {
   );
 }
 
-function PDFFilesPreview({ files }: { files: File[] }) {
+function PDFFilesPreview({
+  files,
+  onReorderFiles,
+  onRemoveFile,
+}: {
+  files: File[];
+  onReorderFiles: (newFiles: File[]) => void;
+  onRemoveFile: (idx: number) => void;
+}) {
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
 
     const loadPreviews = async () => {
       for (const file of files) {
-        if (previews[file.name]) continue; // Skip already loaded previews
+        if (previews[file.name]) continue;
 
         if (file.type === "application/pdf") {
           setLoading((prev) => ({ ...prev, [file.name]: true }));
@@ -1092,19 +1185,80 @@ function PDFFilesPreview({ files }: { files: File[] }) {
     };
   }, [files, previews]);
 
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    e.dataTransfer.setData("text/plain", String(index));
+    setDraggedIdx(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    const sourceIndex = Number(e.dataTransfer.getData("text/plain"));
+    if (isNaN(sourceIndex) || sourceIndex === targetIndex) {
+      setDraggedIdx(null);
+      return;
+    }
+
+    const reordered = [...files];
+    const [moved] = reordered.splice(sourceIndex, 1);
+    reordered.splice(targetIndex, 0, moved);
+    onReorderFiles(reordered);
+    setDraggedIdx(null);
+  };
+
+  const moveItem = (index: number, direction: "left" | "right") => {
+    const target = direction === "left" ? index - 1 : index + 1;
+    if (target < 0 || target >= files.length) return;
+    const reordered = [...files];
+    const temp = reordered[index];
+    reordered[index] = reordered[target];
+    reordered[target] = temp;
+    onReorderFiles(reordered);
+  };
+
   return (
     <div className="grid max-h-[60vh] w-full grid-cols-2 gap-4 overflow-y-auto p-1 sm:grid-cols-3">
       {files.map((file, idx) => (
         <div
-          key={idx}
-          className="border-border/45 bg-card/60 shadow-soft hover:border-primary/20 relative flex flex-col items-center justify-between rounded-xl border p-3 transition-all duration-300"
+          key={`${file.name}-${idx}`}
+          draggable
+          onDragStart={(e) => handleDragStart(e, idx)}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, idx)}
+          className={`border-border/45 bg-card/60 shadow-soft hover:border-primary/40 relative flex cursor-grab flex-col items-center justify-between rounded-xl border p-3 transition-all duration-200 active:cursor-grabbing ${
+            draggedIdx === idx
+              ? "border-primary scale-95 border-dashed opacity-40"
+              : ""
+          }`}
         >
-          {/* Index indicator */}
-          <div className="bg-primary/10 text-primary absolute top-2 left-2 rounded px-1.5 py-0.5 text-[9px] font-bold">
-            {idx + 1}
+          {/* Top Controls: Drag handle, index badge, and delete */}
+          <div className="mb-1 flex w-full items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="bg-primary/10 text-primary rounded px-1.5 py-0.5 text-[9px] font-bold">
+                {idx + 1}
+              </span>
+              <span
+                className="text-muted-foreground/60 hover:text-muted-foreground cursor-grab"
+                title="Drag thumbnail to reorder"
+              >
+                <GripVertical className="h-3 w-3" />
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => onRemoveFile(idx)}
+              className="text-muted-foreground/60 hover:text-destructive p-0.5 transition-colors"
+              title="Remove file"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
           </div>
+
           {loading[file.name] ? (
-            <div className="bg-muted/40 mt-4 flex aspect-[3/4] h-28 w-full animate-pulse items-center justify-center rounded">
+            <div className="bg-muted/40 my-2 flex aspect-[3/4] h-28 w-full animate-pulse items-center justify-center rounded">
               <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
             </div>
           ) : previews[file.name] ? (
@@ -1112,22 +1266,50 @@ function PDFFilesPreview({ files }: { files: File[] }) {
             <img
               src={previews[file.name]}
               alt={file.name}
-              className="border-border/10 mt-4 aspect-[3/4] h-28 rounded border bg-white object-contain shadow-sm"
+              className="border-border/10 pointer-events-none my-2 aspect-[3/4] h-28 rounded border bg-white object-contain shadow-sm"
             />
           ) : (
-            <div className="bg-muted/20 mt-4 flex aspect-[3/4] h-28 w-full flex-col items-center justify-center gap-1 rounded">
+            <div className="bg-muted/20 pointer-events-none my-2 flex aspect-[3/4] h-28 w-full flex-col items-center justify-center gap-1 rounded">
               <FileText className="text-muted-foreground/60 h-8 w-8" />
               <span className="text-muted-foreground text-[8px] font-semibold uppercase">
                 PDF File
               </span>
             </div>
           )}
+
           <span
-            className="text-foreground mt-3 max-w-[130px] truncate text-center text-[10px] font-bold"
+            className="text-foreground max-w-[130px] truncate text-center text-[10px] font-bold"
             title={file.name}
           >
             {file.name}
           </span>
+
+          {/* Quick Swap Controls for touch / mobile */}
+          <div className="border-border/20 mt-2 flex w-full items-center justify-between gap-1 border-t pt-2">
+            <button
+              type="button"
+              onClick={() => moveItem(idx, "left")}
+              disabled={idx === 0}
+              className="border-border/40 hover:bg-muted text-muted-foreground hover:text-foreground inline-flex h-6 w-6 items-center justify-center rounded border text-xs transition-colors disabled:opacity-20"
+              title="Move left"
+              aria-label="Move left"
+            >
+              <ChevronLeft className="h-3 w-3" />
+            </button>
+            <span className="text-muted-foreground font-mono text-[9px]">
+              {formatBytes(file.size)}
+            </span>
+            <button
+              type="button"
+              onClick={() => moveItem(idx, "right")}
+              disabled={idx === files.length - 1}
+              className="border-border/40 hover:bg-muted text-muted-foreground hover:text-foreground inline-flex h-6 w-6 items-center justify-center rounded border text-xs transition-colors disabled:opacity-20"
+              title="Move right"
+              aria-label="Move right"
+            >
+              <ChevronRight className="h-3 w-3" />
+            </button>
+          </div>
         </div>
       ))}
     </div>

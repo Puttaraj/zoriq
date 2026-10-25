@@ -15,7 +15,7 @@ export interface DecodedJwt {
   secondsRemaining: number | null;
 }
 
-function base64UrlDecode(str: string): string {
+export function base64UrlDecode(str: string): string {
   let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
   while (base64.length % 4) {
     base64 += "=";
@@ -30,6 +30,17 @@ function base64UrlDecode(str: string): string {
   } catch {
     return atob(base64);
   }
+}
+
+export function base64UrlEncode(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 }
 
 export function parseJwt(token: string): DecodedJwt | null {
@@ -77,5 +88,99 @@ export function parseJwt(token: string): DecodedJwt | null {
     };
   } catch {
     return null;
+  }
+}
+
+/**
+ * Format dynamic countdown string from seconds remaining.
+ */
+export function formatDetailedCountdown(seconds: number | null): {
+  text: string;
+  isExpired: boolean;
+  severity: "expired" | "urgent" | "valid" | "none";
+} {
+  if (seconds === null) {
+    return {
+      text: "No expiration set (token never expires)",
+      isExpired: false,
+      severity: "none",
+    };
+  }
+
+  if (seconds <= 0) {
+    const elapsed = Math.abs(seconds);
+    const days = Math.floor(elapsed / (3600 * 24));
+    const hours = Math.floor((elapsed % (3600 * 24)) / 3600);
+    const mins = Math.floor((elapsed % 3600) / 60);
+    const secs = elapsed % 60;
+
+    let timeAgo = "";
+    if (days > 0) timeAgo = `${days}d ${hours}h ago`;
+    else if (hours > 0) timeAgo = `${hours}h ${mins}m ago`;
+    else if (mins > 0) timeAgo = `${mins}m ${secs}s ago`;
+    else timeAgo = `${secs}s ago`;
+
+    return {
+      text: `Expired ${timeAgo}`,
+      isExpired: true,
+      severity: "expired",
+    };
+  }
+
+  const days = Math.floor(seconds / (3600 * 24));
+  const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  let remaining = "";
+  if (days > 0) remaining = `${days}d ${hours}h ${mins}m ${secs}s`;
+  else if (hours > 0) remaining = `${hours}h ${mins}m ${secs}s`;
+  else remaining = `${mins}m ${secs}s`;
+
+  return {
+    text: `Expires in ${remaining}`,
+    isExpired: false,
+    severity: seconds < 300 ? "urgent" : "valid",
+  };
+}
+
+/**
+ * Verify HMAC-SHA256 signature completely client-side via Web Crypto API.
+ */
+export async function verifyHmacSha256(
+  token: string,
+  secret: string,
+): Promise<boolean> {
+  const parts = token.trim().split(".");
+  if (parts.length !== 3 || !secret) {
+    return false;
+  }
+
+  try {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    const dataToSign = encoder.encode(`${parts[0]}.${parts[1]}`);
+
+    const key = await window.crypto.subtle.importKey(
+      "raw",
+      keyData,
+      { name: "HMAC", hash: { name: "SHA-256" } },
+      false,
+      ["sign"],
+    );
+
+    const signatureBuffer = await window.crypto.subtle.sign(
+      "HMAC",
+      key,
+      dataToSign,
+    );
+    const computedSignatureB64Url = base64UrlEncode(
+      new Uint8Array(signatureBuffer),
+    );
+
+    return computedSignatureB64Url === parts[2];
+  } catch (err) {
+    console.error("HMAC verification error", err);
+    return false;
   }
 }
